@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق الطالب</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
         body { background-color: #f4f6f9; color: #333; padding-bottom: 70px; }
@@ -127,7 +127,10 @@
         const SUPABASE_URL = 'https://icpcthgueabxwwevowbt.supabase.co';
         const SUPABASE_ANON_KEY = 'Sb_publishable_rg857jiJ2tgqje-odQHZIQ_2Sd0UzbD';
         
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession: false },
+            global: { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+        });
 
         initApp();
         loadStories();
