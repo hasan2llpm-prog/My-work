@@ -10,6 +10,7 @@
         
         /* الشريط العلوي */
         .top-bar { display: flex; justify-content: space-between; align-items: center; background: #007bff; color: #fff; padding: 15px; position: sticky; top: 0; z-index: 100; }
+        .top-bar h2 { font-size: 18px; }
         .top-bar button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
 
         /* القائمة الجانبية */
@@ -17,7 +18,7 @@
         .sidebar.active { right: 0; }
         .sidebar h3 { margin-bottom: 15px; font-size: 18px; color: #007bff; }
         .sidebar p, .sidebar a { display: block; margin: 10px 0; color: #333; text-decoration: none; font-size: 14px; }
-        .sidebar .profile-pic { width: 70px; height: 70px; border-radius: 50%; background: #ddd; margin-bottom: 10px; background-size: cover; background-position: center; }
+        .profile-pic { width: 70px; height: 70px; border-radius: 50%; background: #ddd; margin-bottom: 10px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #777; }
 
         /* قسم الستوري */
         .stories-container { display: flex; gap: 10px; padding: 10px; background: #fff; overflow-x: auto; border-bottom: 1px solid #ddd; }
@@ -27,13 +28,13 @@
 
         /* المراحل الأربع */
         .stages-section { padding: 15px; }
-        .stage-card { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .stage-actions { display: none; margin-top: 10px; gap: 10px; }
-        .stage-actions button { padding: 5px 10px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .stage-card { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .stage-actions { display: none; margin-top: -5px; margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 0 0 8px 8px; gap: 10px; }
+        .stage-actions button { flex: 1; padding: 8px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
 
         /* المربعات الخمسة السفلية */
-        .bottom-grid { position: fixed; bottom: 0; left: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-top: 1px solid #ddd; text-align: center; }
-        .grid-box { padding: 12px 5px; font-size: 12px; border-right: 1px solid #eee; cursor: pointer; background: #fff; }
+        .bottom-grid { position: fixed; bottom: 0; left: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-top: 1px solid #ddd; text-align: center; z-index: 100; }
+        .grid-box { padding: 12px 2px; font-size: 11px; border-right: 1px solid #eee; cursor: pointer; background: #fff; color: #555; }
         .grid-box:hover { background: #f1f1f1; }
 
         /* أدوات عامة */
@@ -45,14 +46,14 @@
 
     <!-- الشريط العلوي -->
     <div class="top-bar">
-        <button onclick="toggleNotifications()">🔔</button>
+        <button onclick="openNotifications()">🔔</button>
         <h2>تطبيق الطالب</h2>
         <button onclick="toggleSidebar()">☰</button>
     </div>
 
     <!-- الستوريات -->
     <div class="stories-container">
-        <div class="story-item" onclick="addStory()">
+        <div class="story-item" onclick="addNewStory()">
             <div class="story-circle">+</div>
             <span>قصتي</span>
         </div>
@@ -74,36 +75,36 @@
             <span>المرحلة الأولى</span>
             <span>▼</span>
         </div>
-        <div id="stage-1-actions" class="stage-actions">
-            <button onclick="browseFiles(1)">تصفح الملفات</button>
-            <button onclick="downloadFiles(1)">تحميل الملفات</button>
+        <div id="stage-1-actions" class="stage-actions" style="display: none;">
+            <button onclick="location.href='browse.html?stage=1'">تصفح الملفات</button>
+            <button onclick="location.href='download.html?stage=1'">تحميل الملفات</button>
         </div>
 
         <div class="stage-card" onclick="toggleStage(2)">
             <span>المرحلة الثانية</span>
             <span>▼</span>
         </div>
-        <div id="stage-2-actions" class="stage-actions">
-            <button onclick="browseFiles(2)">تصفح الملفات</button>
-            <button onclick="downloadFiles(2)">تحميل الملفات</button>
+        <div id="stage-2-actions" class="stage-actions" style="display: none;">
+            <button onclick="location.href='browse.html?stage=2'">تصفح الملفات</button>
+            <button onclick="location.href='download.html?stage=2'">تحميل الملفات</button>
         </div>
 
         <div class="stage-card" onclick="toggleStage(3)">
             <span>المرحلة الثالثة</span>
             <span>▼</span>
         </div>
-        <div id="stage-3-actions" class="stage-actions">
-            <button onclick="browseFiles(3)">تصفح الملفات</button>
-            <button onclick="downloadFiles(3)">تحميل الملفات</button>
+        <div id="stage-3-actions" class="stage-actions" style="display: none;">
+            <button onclick="location.href='browse.html?stage=3'">تصفح الملفات</button>
+            <button onclick="location.href='download.html?stage=3'">تحميل الملفات</button>
         </div>
 
         <div class="stage-card" onclick="toggleStage(4)">
             <span>المرحلة الرابعة</span>
             <span>▼</span>
         </div>
-        <div id="stage-4-actions" class="stage-actions">
-            <button onclick="browseFiles(4)">تصفح الملفات</button>
-            <button onclick="downloadFiles(4)">تحميل الملفات</button>
+        <div id="stage-4-actions" class="stage-actions" style="display: none;">
+            <button onclick="location.href='browse.html?stage=4'">تصفح الملفات</button>
+            <button onclick="location.href='download.html?stage=4'">تحميل الملفات</button>
         </div>
     </div>
 
@@ -111,21 +112,21 @@
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <h3>حسابي الشخصي</h3>
-        <div class="profile-pic" id="sidebar-pic"></div>
-        <p><strong>البريد:</strong> student@app.com</p>
+        <div class="profile-pic" id="sidebar-pic">👤</div>
+        <p><strong>البريد:</strong> <span id="user-email">student@app.com</span></p>
         <p><strong>الهاتف:</strong> مؤكد ✓</p>
         <p><strong>اسم اليوزر:</strong> <span id="permanent-username"></span></p>
         <p><strong>رمز الإحالة:</strong> <span id="referral-code"></span></p>
         
         <hr style="margin: 15px 0;">
         
-        <label>حالة الحساب: </label>
-        <select id="account-status" onchange="updateAccountStatus()" style="width:100%; padding:5px; margin-top:5px;">
+        <label style="font-size: 13px;">حالة الحساب: </label>
+        <select id="account-status" onchange="updateAccountStatus()" style="width:100%; padding:6px; margin-top:5px; border-radius:4px; border:1px solid #ccc;">
             <option value="public">عام</option>
             <option value="private">خاص</option>
         </select>
 
-        <button onclick="openMessaging()" style="width:100%; margin-top:10px; padding:8px; background:#28a745; color:#fff; border:none; border-radius:4px;">زر مراسلة</button>
+        <button onclick="openMessaging()" style="width:100%; margin-top:10px; padding:8px; background:#28a745; color:#fff; border:none; border-radius:4px; cursor:pointer;">زر مراسلة</button>
         
         <hr style="margin: 15px 0;">
         
@@ -142,7 +143,7 @@
     </div>
 
     <script>
-        // إدارة اليوزر الثابت ورمز الإحالة بحيث لا تتغير عند الخروج والدخول
+        // اليوزر الثابت ورمز الإحالة
         let username = localStorage.getItem('perm_username');
         if (!username) {
             username = 'user_' + Math.floor(Math.random() * 90000 + 10000);
@@ -152,10 +153,16 @@
 
         let refCode = localStorage.getItem('perm_ref');
         if (!refCode) {
-            refCode = Math.floor(Math.random() * 900000 + 1000); // فوق 1000
+            refCode = Math.floor(Math.random() * 900000 + 1000);
             localStorage.setItem('perm_ref', refCode);
         }
         document.getElementById('referral-code').innerText = refCode;
+
+        // حالة الحساب
+        let savedStatus = localStorage.getItem('acc_status');
+        if (savedStatus) {
+            document.getElementById('account-status').value = savedStatus;
+        }
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -167,33 +174,25 @@
             actions.style.display = actions.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function browseFiles(stage) {
-            alert('تصفح ملفات المرحلة ' + stage);
-        }
-
-        function downloadFiles(stage) {
-            alert('تحميل ملفات المرحلة ' + stage);
-        }
-
-        function openExams() {
-            alert('فتح قسم الاختبارات');
-        }
-
-        function addStory() {
-            alert('إضافة ستوري جديدة');
-        }
-
         function updateAccountStatus() {
             const status = document.getElementById('account-status').value;
             localStorage.setItem('acc_status', status);
         }
 
-        function openMessaging() {
-            alert('فتح واجهة المراسلة');
+        function openNotifications() {
+            // مكان مخصص لفتح صفحة أو نافذة الإشعارات الحقيقية
         }
 
-        function toggleNotifications() {
-            alert('لوحة الإشعارات');
+        function addNewStory() {
+            // مكان مخصص لفتح كاميرا الهاتف أو معرض الصور لإضافة ستوري
+        }
+
+        function openMessaging() {
+            // مكان مخصص لنافذة الدردشة المباشرة
+        }
+
+        function openExams() {
+            // الانتقال لصفحة الاختبارات الحقيقية
         }
     </script>
 </body>
