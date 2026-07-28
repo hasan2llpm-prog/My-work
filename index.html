@@ -46,14 +46,13 @@
         <button onclick="toggleSidebar()">☰</button>
     </div>
 
-    <!-- شريط الستوريات الديناميكي -->
+    <!-- شريط الستوريات -->
     <div class="stories-container" id="stories-container">
         <div class="story-item" onclick="triggerUploadStory()">
             <div class="story-circle">+</div>
             <span>قصتي</span>
         </div>
     </div>
-    <!-- حقل مخفي لاختيار صورة الستوري -->
     <input type="file" id="story-file-input" style="display: none;" accept="image/*" onchange="uploadStory(this)">
 
     <div class="stages-section">
@@ -172,7 +171,7 @@
                 .eq('username', username);
         }
 
-        // دوال الستوري
+        // دالة رفع الستوري مع ضغط الصورة لتفادي الأخطاء
         function triggerUploadStory() {
             document.getElementById('story-file-input').click();
         }
@@ -182,30 +181,40 @@
                 const file = input.files[0];
                 let username = localStorage.getItem('perm_username');
                 
-                // تحويل الصورة إلى رابط مؤقت (Data URL) لحفظها فوريًا في قاعدة البيانات
                 const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const base64Image = e.target.result;
-                    
-                    // حفظ الستوري في جدول السحابة
-                    const { error } = await supabaseClient.from('stories').insert([
-                        { username: username, media_url: base64Image }
-                    ]);
-
-                    if (!error) {
-                        alert('تم نشر الستوري بنجاح!');
-                        loadStories();
-                    } else {
-                        alert('حدث خطأ أثناء النشر');
-                    }
-                };
                 reader.readAsDataURL(file);
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = async function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 400;
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        const { error } = await supabaseClient.from('stories').insert([
+                            { username: username, media_url: compressedImage }
+                        ]);
+
+                        if (!error) {
+                            alert('تم نشر الستوري بنجاح!');
+                            loadStories();
+                        } else {
+                            alert('خطأ: ' + error.message);
+                        }
+                    }
+                }
             }
         }
 
         async function loadStories() {
             const container = document.getElementById('stories-container');
-            // الحفاظ على زر "قصتي" الثابت في البداية
             container.innerHTML = `
                 <div class="story-item" onclick="triggerUploadStory()">
                     <div class="story-circle">+</div>
@@ -213,7 +222,6 @@
                 </div>
             `;
 
-            // جلب الستوريات من السحابة
             const { data: stories, error } = await supabaseClient
                 .from('stories')
                 .select('*')
