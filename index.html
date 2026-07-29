@@ -37,11 +37,15 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 999; }
         .overlay.active { display: block; }
 
-        /* نافذة عرض الستوري */
-        .story-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column; }
-        .story-modal img { max-width: 90%; max-height: 80vh; border-radius: 8px; }
-        .story-modal span { color: #fff; margin-top: 15px; font-size: 16px; }
-        .story-modal button { position: absolute; top: 20px; left: 20px; background: #fff; border: none; font-size: 20px; padding: 5px 12px; border-radius: 50%; cursor: pointer; }
+        /* نافذة عرض الستوري المطورة */
+        .story-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column; color: #fff; }
+        .story-modal img { max-width: 90%; max-height: 65vh; border-radius: 8px; object-fit: contain; }
+        .story-info { margin-top: 15px; text-align: center; font-size: 14px; display: flex; gap: 20px; align-items: center; }
+        .story-actions-bar { margin-top: 15px; display: flex; gap: 15px; }
+        .story-actions-bar button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .btn-edit { background: #ffc107; color: #000; }
+        .btn-delete { background: #dc3545; color: #fff; }
+        .story-modal .close-btn { position: absolute; top: 20px; left: 20px; background: #fff; border: none; font-size: 20px; padding: 5px 12px; border-radius: 50%; cursor: pointer; color: #000; }
     </style>
 </head>
 <body>
@@ -60,12 +64,23 @@
         </div>
     </div>
     <input type="file" id="story-file-input" style="display: none;" accept="image/*" onchange="uploadStory(this)">
+    <input type="file" id="story-edit-input" style="display: none;" accept="image/*" onchange="updateStoryImage(this)">
 
-    <!-- نافذة عرض الستوري -->
+    <!-- نافذة عرض الستوري المتقدمة -->
     <div class="story-modal" id="storyModal">
-        <button onclick="closeStoryModal()">✕</button>
+        <button class="close-btn" onclick="closeStoryModal()">✕</button>
+        <div id="modalUsernameHeader" style="margin-bottom: 10px; font-weight: bold; font-size: 16px;"></div>
         <img id="modalImage" src="" alt="Story View">
-        <span id="modalUsername"></span>
+        
+        <div class="story-info">
+            <span>👁 25 مشاهدة</span>
+            <span style="cursor: pointer;" onclick="likeStory()">❤️ <span id="likeCount">10</span></span>
+        </div>
+
+        <div class="story-actions-bar" id="storyOwnerActions" style="display: none;">
+            <button class="btn-edit" onclick="triggerEditStory()">✏️ تعديل</button>
+            <button class="btn-delete" onclick="deleteCurrentStory()">🗑 حذف</button>
+        </div>
     </div>
 
     <div class="stages-section">
@@ -145,6 +160,8 @@
             global: { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
         });
 
+        let currentActiveStoryId = null;
+
         initApp();
         loadStories();
 
@@ -201,12 +218,16 @@
             reader.onload = async function(e) {
                 const image = e.target.result;
 
+                // حساب وقت انتهاء الستوري بعد 24 ساعة
+                const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
                 const { error } = await supabaseClient
                     .from('stories')
                     .insert([
                         {
                             username: username,
-                            media_url: image
+                            media_url: image,
+                            expires_at: expiresAt
                         }
                     ]);
 
@@ -230,15 +251,18 @@
                 </div>
             `;
 
+            // جلب الستوريات النشطة فقط التي لم ينتهِ وقتها
+            const nowIso = new Date().toISOString();
             const { data, error } = await supabaseClient
                 .from('stories')
                 .select('*')
+                .gt('expires_at', nowIso)
                 .order('created_at', { ascending: false });
 
             if (data) {
                 data.forEach(story => {
                     container.innerHTML += `
-                        <div class="story-item" onclick="openStoryModal('${story.media_url}', '${story.username}')">
+                        <div class="story-item" onclick='openStoryModal(${JSON.stringify(story)})'>
                             <div class="story-circle">
                                 <img src="${story.media_url}" alt="story">
                             </div>
@@ -249,14 +273,78 @@
             }
         }
 
-        function openStoryModal(mediaUrl, username) {
-            document.getElementById('modalImage').src = mediaUrl;
-            document.getElementById('modalUsername').innerText = username;
+        function openStoryModal(story) {
+            currentActiveStoryId = story.id;
+            document.getElementById('modalImage').src = story.media_url;
+            document.getElementById('modalUsernameHeader').innerText = story.username;
             document.getElementById('storyModal').style.display = 'flex';
+
+            let currentUsername = localStorage.getItem('perm_username');
+            let ownerActions = document.getElementById('storyOwnerActions');
+
+            // إظهار أزرار التعديل والحذف فقط إذا كان المستخدم هو صاحب الستوري
+            if (story.username === currentUsername) {
+                ownerActions.style.display = 'flex';
+            } else {
+                ownerActions.style.display = 'none';
+            }
         }
 
         function closeStoryModal() {
             document.getElementById('storyModal').style.display = 'none';
+            currentActiveStoryId = null;
+        }
+
+        async function deleteCurrentStory() {
+            if (!currentActiveStoryId) return;
+            if (!confirm("هل أنت متأكد من حذف الستوري؟")) return;
+
+            const { error } = await supabaseClient
+                .from('stories')
+                .delete()
+                .eq('id', currentActiveStoryId);
+
+            if (!error) {
+                showMessage("تم الحذف بنجاح 🗑");
+                closeStoryModal();
+                loadStories();
+            } else {
+                showMessage("خطأ أثناء الحذف");
+            }
+        }
+
+        function triggerEditStory() {
+            document.getElementById('story-edit-input').click();
+        }
+
+        async function updateStoryImage(input) {
+            if (!input.files[0] || !currentActiveStoryId) return;
+
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const newImage = e.target.result;
+
+                const { error } = await supabaseClient
+                    .from('stories')
+                    .update({ media_url: newImage })
+                    .eq('id', currentActiveStoryId);
+
+                if (!error) {
+                    showMessage("تم التعديل بنجاح ✏️");
+                    document.getElementById('modalImage').src = newImage;
+                    loadStories();
+                } else {
+                    showMessage("خطأ أثناء التعديل");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function likeStory() {
+            let likeElem = document.getElementById('likeCount');
+            likeElem.innerText = parseInt(likeElem.innerText) + 1;
+            showMessage("تم الإعجاب ❤️");
         }
 
         function showMessage(text) {
