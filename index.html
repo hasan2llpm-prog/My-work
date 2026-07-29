@@ -13,12 +13,18 @@
         .top-bar h2 { font-size: 18px; }
         .top-bar button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
 
-        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); transition: 0.3s; z-index: 1000; padding: 20px; overflow-y: auto; }
+        .sidebar { position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); transition: 0.3s; z-index: 1000; padding: 20px; overflow-y: auto; }
         .sidebar.active { right: 0; }
-        .sidebar h3 { margin-bottom: 15px; font-size: 18px; color: #007bff; }
-        .sidebar p, .sidebar a { display: block; margin: 10px 0; color: #333; text-decoration: none; font-size: 14px; word-break: break-all; }
-        
-        .profile-pic { width: 70px; height: 70px; border-radius: 50%; background: #ddd; margin-bottom: 10px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #777; overflow: hidden; cursor: pointer; border: 2px solid #007bff; }
+        .sidebar h3 { margin-bottom: 15px; font-size: 18px; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .sidebar-item { margin: 12px 0; font-size: 14px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
+        .sidebar-item strong { display: block; color: #555; font-size: 12px; margin-bottom: 3px; }
+        .sidebar-item span { color: #222; font-size: 14px; word-break: break-all; }
+        .sidebar-actions { display: flex; gap: 5px; margin-top: 5px; }
+        .sidebar-actions button { padding: 4px 8px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-edit-field { background: #ffc107; color: #000; }
+        .btn-del-field { background: #dc3545; color: #fff; }
+
+        .profile-pic { width: 80px; height: 80px; border-radius: 50%; background: #ddd; margin: 0 auto 15px auto; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #777; overflow: hidden; cursor: pointer; border: 2px solid #007bff; position: relative; }
         .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
 
         .stories-container { display: flex; gap: 10px; padding: 10px; background: #fff; overflow-x: auto; border-bottom: 1px solid #ddd; }
@@ -30,7 +36,6 @@
         .stages-section { padding: 15px; }
         .stage-card { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; position: relative; }
         
-        /* تعديل الأزرار لتصبح عائمة بشكل منسق تحت المرحلة المحددة */
         .stage-actions { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; padding: 12px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 10; gap: 10px; display: none; }
         .stage-actions.active { display: flex; }
         .stage-actions button { flex: 1; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,123,255,0.3); transition: 0.2s; }
@@ -43,12 +48,12 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 999; }
         .overlay.active { display: block; }
 
-        /* نافذة إجبارية لإدخال البريد والصورة الشخصية */
+        /* نافذة إجبارية لإكمال البيانات أول مرة */
         .mandatory-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 5000; color: #fff; text-align: center; }
         .mandatory-box { background: #fff; color: #333; padding: 25px; border-radius: 12px; width: 85%; max-width: 320px; }
         .mandatory-box h3 { margin-bottom: 10px; color: #007bff; font-size: 18px; }
         .mandatory-box p { font-size: 13px; margin-bottom: 15px; color: #666; }
-        .mandatory-box input { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; text-align: right; }
+        .mandatory-box input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; text-align: right; }
         .mandatory-box button { background: #007bff; color: #fff; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 5px; }
 
         /* نافذة عرض الستوري */
@@ -68,12 +73,15 @@
 </head>
 <body>
 
-    <!-- نافذة إجبارية لإدخال البريد الإلكتروني ورفع الصورة -->
+    <!-- نافذة إجبارية لإكمال الملف الشخصي عند الدخول لأول مرة -->
     <div class="mandatory-modal" id="mandatoryModal">
         <div class="mandatory-box">
             <h3>أهلاً بك في التطبيق</h3>
-            <p>يرجى إدخال البريد الإلكتروني واختيار صورة شخصية لإكمال الملف الشخصي والمتابعة.</p>
-            <input type="email" id="mandatory-email" placeholder="البريد الإلكتروني (Email)">
+            <p>يرجى إدخال بياناتك الأساسية واختيار صورة شخصية للمتابعة.</p>
+            <input type="text" id="init-name" placeholder="الاسم الكامل">
+            <input type="text" id="init-username" placeholder="اسم اليوزر (Username)">
+            <input type="tel" id="init-phone" placeholder="رقم الهاتف">
+            <input type="email" id="init-email" placeholder="البريد الإلكتروني">
             <button onclick="triggerMandatoryAvatarUpload()">اختر الصورة الشخصية & حفظ 📷</button>
         </div>
     </div>
@@ -171,24 +179,61 @@
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- القائمة الجانبية (Sidebar) المحدثة -->
     <div class="sidebar" id="sidebar">
         <h3>الملف الشخصي</h3>
-        <div class="profile-pic" id="sidebar-pic-container" onclick="document.getElementById('sidebar-avatar-input').click()">👤</div>
-        <p><strong>اسم اليوزر:</strong> <span id="permanent-username">جاري التحميل...</span></p>
-        <p><strong>البريد:</strong> <span id="permanent-email">جاري التحميل...</span></p>
-        <p><strong>رمز الإحالة:</strong> <span id="referral-code">جاري التحميل...</span></p>
         
+        <div class="profile-pic" id="sidebar-pic-container" onclick="document.getElementById('sidebar-avatar-input').click()" title="انقر لتغيير الصورة الشخصية">
+            👤
+        </div>
+
+        <div class="sidebar-item">
+            <strong>الاسم الكامل:</strong>
+            <span id="profile-name">جاري التحميل...</span>
+            <div class="sidebar-actions">
+                <button class="btn-edit-field" onclick="editField('name')">تعديل</button>
+                <button class="btn-del-field" onclick="deleteField('name')">حذف</button>
+            </div>
+        </div>
+
+        <div class="sidebar-item">
+            <strong>اسم اليوزر (Username):</strong>
+            <span id="profile-username">جاري التحميل...</span>
+            <div class="sidebar-actions">
+                <button class="btn-edit-field" onclick="editField('username')">تعديل (كل 7 أيام)</button>
+                <button class="btn-del-field" onclick="deleteField('username')">حذف</button>
+            </div>
+        </div>
+
+        <div class="sidebar-item">
+            <strong>رقم الهاتف:</strong>
+            <span id="profile-phone">غير محدد</span>
+            <div class="sidebar-actions">
+                <button class="btn-edit-field" onclick="editField('phone')">تعديل</button>
+                <button class="btn-del-field" onclick="deleteField('phone')">حذف</button>
+            </div>
+        </div>
+
+        <div class="sidebar-item">
+            <strong>البريد الإلكتروني:</strong>
+            <span id="profile-email">جاري التحميل...</span>
+            <div class="sidebar-actions">
+                <button class="btn-edit-field" onclick="editField('email')">تعديل</button>
+                <button class="btn-del-field" onclick="deleteField('email')">حذف</button>
+            </div>
+        </div>
+
+        <div class="sidebar-item">
+            <strong>رمز الإحالة (ثابت):</strong>
+            <span id="profile-referral" style="font-weight: bold; color: #007bff;">جاري التحميل...</span>
+        </div>
+
         <hr style="margin: 15px 0;">
+
+        <button onclick="shareApp()" style="width: 100%; padding: 10px; background: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">👥 دعوة صديق</button>
         
-        <label style="font-size: 13px;">حالة الحساب: </label>
-        <select id="account-status" onchange="updateAccountStatus()" style="width:100%; padding:6px; margin-top:5px; border-radius:4px; border:1px solid #ccc;">
-            <option value="public">عام</option>
-            <option value="private">خاص</option>
-        </select>
-        
-        <hr style="margin: 15px 0;">
-        
-        <a href="https://wa.me/message/TSDV5JBPE2KSP1" target="_blank" style="color: #007bff; font-weight: bold;">تواصل مع المطور (واتساب)</a>
+        <a href="https://wa.me/message/TSDV5JBPE2KSP1" target="_blank" style="display: block; text-align: center; background: #007bff; color: #fff; padding: 10px; border-radius: 5px; text-decoration: none; font-weight: bold;">💬 تواصل معنا</a>
     </div>
 
     <div class="bottom-grid">
@@ -214,71 +259,82 @@
         loadStories();
 
         async function initApp() {
-            let username = localStorage.getItem('perm_username');
-            let refCode = localStorage.getItem('perm_ref');
+            let localKey = localStorage.getItem('perm_user_key'); // سنستخدم معرف فريد محلي أو الإيميل/اليوزر للربط
 
-            if (!username) {
-                username = 'user_' + Math.floor(Math.random() * 90000 + 10000);
-                refCode = Math.floor(Math.random() * 900000 + 1000);
-                
-                localStorage.setItem('perm_username', username);
-                localStorage.setItem('perm_ref', refCode);
-
-                await supabaseClient.from('profiles').insert([
-                    { username: username, referral_code: refCode, account_status: 'public' }
-                ]);
+            if (!localKey) {
+                localKey = 'user_' + Math.random().toString(36.substring(2, 9));
+                localStorage.setItem('perm_user_key', localKey);
             }
 
-            document.getElementById('permanent-username').innerText = username;
-            document.getElementById('referral-code').innerText = refCode;
-
-            checkUserProfile(username);
+            checkUserProfile();
         }
 
-        async function checkUserProfile(username) {
+        async function checkUserProfile() {
+            let localKey = localStorage.getItem('perm_user_key');
+
             const { data, error } = await supabaseClient
                 .from('profiles')
-                .select('avatar_url, email, account_status')
-                .eq('username', username)
+                .select('*')
+                .eq('device_key', localKey)
                 .single();
 
             if (data) {
-                if (data.account_status) {
-                    document.getElementById('account-status').value = data.account_status;
-                }
+                // عرض البيانات في القائمة
+                document.getElementById('profile-name').innerText = data.full_name || 'غير محدد';
+                document.getElementById('profile-username').innerText = data.username || 'غير محدد';
+                document.getElementById('profile-phone').innerText = data.phone || 'غير محدد';
+                document.getElementById('profile-email').innerText = data.email || 'غير محدد';
+                document.getElementById('profile-referral').innerText = data.referral_code || '---';
 
-                if (data.email) {
-                    document.getElementById('permanent-email').innerText = data.email;
-                }
-
-                if (data.avatar_url && data.email) {
+                if (data.avatar_url) {
                     displayAvatarInUI(data.avatar_url);
-                    document.getElementById('mandatoryModal').style.display = 'none';
-                } else {
+                }
+
+                // إذا كانت البيانات ناقصة، نظهر نافذة التسجيل الإجباري
+                if (!data.username || !data.email || !data.full_name) {
                     document.getElementById('mandatoryModal').style.display = 'flex';
-                    if (data.email) {
-                        document.getElementById('mandatory-email').value = data.email;
-                    }
+                } else {
+                    document.getElementById('mandatoryModal').style.display = 'none';
                 }
             } else {
+                // إنشاء سجل جديد افتراضي إذا لم يوجد
+                let refCode = Math.floor(Math.random() * 900000 + 100000).toString();
+                await supabaseClient.from('profiles').insert([
+                    { device_key: localKey, referral_code: refCode }
+                ]);
                 document.getElementById('mandatoryModal').style.display = 'flex';
             }
         }
 
         function triggerMandatoryAvatarUpload() {
-            const emailInput = document.getElementById('mandatory-email').value.trim();
-            if (!emailInput || !emailInput.includes('@')) {
-                showMessage("يرجى إدخال بريد إلكتروني صحيح أولاً");
+            const name = document.getElementById('init-name').value.trim();
+            const username = document.getElementById('init-username').value.trim();
+            const phone = document.getElementById('init-phone').value.trim();
+            const email = document.getElementById('init-email').value.trim();
+
+            if (!name || !username || !email) {
+                showMessage("يرجى ملء الحقول الأساسية (الاسم، اليوزر، البريد)");
                 return;
             }
+
+            // حفظ مؤقت في اللوكالستورج لاستخدامه بعد اختيار الصورة
+            localStorage.setItem('temp_name', name);
+            localStorage.setItem('temp_username', username);
+            localStorage.setItem('temp_phone', phone);
+            localStorage.setItem('temp_email', email);
+
             document.getElementById('mandatory-avatar-input').click();
         }
 
         async function saveMandatoryProfile(input) {
             if (!input.files[0]) return;
             const file = input.files[0];
-            const emailInput = document.getElementById('mandatory-email').value.trim();
-            let username = localStorage.getItem('perm_username');
+            let localKey = localStorage.getItem('perm_user_key');
+
+            const name = localStorage.getItem('temp_name');
+            const username = localStorage.getItem('temp_username');
+            const phone = localStorage.getItem('temp_phone');
+            const email = localStorage.getItem('temp_email');
 
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -286,16 +342,23 @@
 
                 const { error } = await supabaseClient
                     .from('profiles')
-                    .update({ avatar_url: base64Image, email: emailInput })
-                    .eq('username', username);
+                    .update({
+                        full_name: name,
+                        username: username,
+                        phone: phone,
+                        email: email,
+                        avatar_url: base64Image,
+                        last_username_update: new Date().toISOString()
+                    })
+                    .eq('device_key', localKey);
 
                 if (!error) {
                     displayAvatarInUI(base64Image);
-                    document.getElementById('permanent-email').innerText = emailInput;
                     document.getElementById('mandatoryModal').style.display = 'none';
                     showMessage("تم حفظ الملف الشخصي بنجاح ✅");
+                    checkUserProfile();
                 } else {
-                    showMessage("خطأ أثناء الحفظ");
+                    showMessage("خطأ: اسم اليوزر مستخدم مسبقاً أو حدث خطأ.");
                 }
             };
             reader.readAsDataURL(file);
@@ -304,30 +367,88 @@
         async function updateSidebarAvatar(input) {
             if (!input.files[0]) return;
             const file = input.files[0];
-            let username = localStorage.getItem('perm_username');
+            let localKey = localStorage.getItem('perm_user_key');
 
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64Image = e.target.result;
-
-                const { error } = await supabaseClient
-                    .from('profiles')
-                    .update({ avatar_url: base64Image })
-                    .eq('username', username);
-
-                if (!error) {
-                    displayAvatarInUI(base64Image);
-                    showMessage("تم تحديث الصورة الشخصية ✏️");
-                } else {
-                    showMessage("خطأ أثناء التحديث");
-                }
+                await supabaseClient.from('profiles').update({ avatar_url: base64Image }).eq('device_key', localKey);
+                displayAvatarInUI(base64Image);
+                showMessage("تم تحديث الصورة الشخصية 📷");
             };
             reader.readAsDataURL(file);
         }
 
         function displayAvatarInUI(url) {
-            const container = document.getElementById('sidebar-pic-container');
-            container.innerHTML = `<img src="${url}" alt="Profile">`;
+            document.getElementById('sidebar-pic-container').innerHTML = `<img src="${url}" alt="Profile">`;
+        }
+
+        // تعديل الحقول مع شرط الـ 7 أيام لليوزر والاسم
+        async function editField(field) {
+            let localKey = localStorage.getItem('perm_user_key');
+            
+            // جلب البيانات الحالية للتحقق من وقت التحديث الأخير
+            const { data } = await supabaseClient.from('profiles').select('*').eq('device_key', localKey).single();
+            
+            if ((field === 'username' || field === 'name') && data && data.last_username_update) {
+                let lastUpdate = new Date(data.last_username_update);
+                let now = new Date();
+                let diffDays = (now - lastUpdate) / (1000 * 60 * 60 * 24);
+
+                if (diffDays < 7) {
+                    let remainingDays = Math.ceil(7 - diffDays);
+                    showMessage(`عذراً، يمكنك تغيير ${field === 'username' ? 'اليوزر' : 'الاسم'} مرة كل 7 أيام فقط. باقي ${remainingDays} أيام.`);
+                    return;
+                }
+            }
+
+            let fieldNamesAr = { 'name': 'الاسم الكامل', 'username': 'اسم اليوزر', 'phone': 'رقم الهاتف', 'email': 'البريد الإلكتروني' };
+            let newValue = prompt(`أدخل التعديل الجديد لـ ${fieldNamesAr[field]}:`);
+            
+            if (newValue === null || newValue.trim() === "") return;
+
+            let updateObj = {};
+            updateObj[field] = newValue.trim();
+
+            if (field === 'username' || field === 'name') {
+                updateObj['last_username_update'] = new Date().toISOString();
+            }
+
+            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('device_key', localKey);
+
+            if (!error) {
+                showMessage("تم التعديل بنجاح ✅");
+                checkUserProfile();
+            } else {
+                showMessage("حدث خطأ أثناء التعديل (قد يكون اليوزر مستخدم مسبقاً)");
+            }
+        }
+
+        // حذف محتوى الحقل
+        async function deleteField(field) {
+            let localKey = localStorage.getItem('perm_user_key');
+            if (!confirm("هل أنت متأكد من حذف هذا الحقل؟")) return;
+
+            let updateObj = {};
+            updateObj[field] = null;
+
+            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('device_key', localKey);
+            if (!error) {
+                showMessage("تم الحذف بنجاح 🗑");
+                checkUserProfile();
+            } else {
+                showMessage("خطأ أثناء الحذف");
+            }
+        }
+
+        function shareApp() {
+            let refCode = document.getElementById('profile-referral').innerText;
+            let shareText = `انضم إلي في تطبيق الطالب واستفد من الملفات الدراسية! استخدم رمز الإحالة الخاص بي: ${refCode}`;
+            if (navigator.share) {
+                navigator.share({ title: 'تطبيق الطالب', text: shareText, url: window.location.href });
+            } else {
+                prompt("انسخ رابط الإحالة أو الرسالة:", shareText);
+            }
         }
 
         function toggleSidebar() {
@@ -336,86 +457,37 @@
         }
 
         function toggleStage(num) {
-            // إغلاق باقي الأอกراف المفتوحة أولاً
             for(let i=1; i<=4; i++) {
                 if(i !== num) {
                     document.getElementById(`stage-${i}-actions`).classList.remove('active');
                 }
             }
-            const actions = document.getElementById(`stage-${num}-actions`);
-            actions.classList.toggle('active');
+            document.getElementById(`stage-${num}-actions`).classList.toggle('active');
         }
 
-        async function updateAccountStatus() {
-            const status = document.getElementById('account-status').value;
-            let username = localStorage.getItem('perm_username');
-            await supabaseClient
-                .from('profiles')
-                .update({ account_status: status })
-                .eq('username', username);
-        }
-
-        function triggerUploadStory() {
-            document.getElementById('story-file-input').click();
-        }
-
+        // وظائف الستوريات المعتادة
+        function triggerUploadStory() { document.getElementById('story-file-input').click(); }
         async function uploadStory(input) {
             if (!input.files[0]) return;
-
             const file = input.files[0];
-            let username = localStorage.getItem('perm_username');
-
-            const reader = new FileReader();
+            let username = document.getElementById('profile-username').innerText;
+            let reader = new FileReader();
             reader.onload = async function(e) {
-                const image = e.target.result;
-                const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-                const { error } = await supabaseClient
-                    .from('stories')
-                    .insert([
-                        {
-                            username: username,
-                            media_url: image,
-                            expires_at: expiresAt
-                        }
-                    ]);
-
-                if (error) {
-                    showMessage("خطأ: " + error.message);
-                } else {
-                    showMessage("تم النشر ✅");
-                    loadStories();
-                }
+                let expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+                await supabaseClient.from('stories').insert([{ username: username, media_url: e.target.result, expires_at: expiresAt }]);
+                showMessage("تم نشر الستوري ✅");
+                loadStories();
             };
             reader.readAsDataURL(file);
         }
 
         async function loadStories() {
             const container = document.getElementById('stories-container');
-            container.innerHTML = `
-                <div class="story-item" onclick="triggerUploadStory()">
-                    <div class="story-circle">+</div>
-                    <span>قصتي</span>
-                </div>
-            `;
-
-            const nowIso = new Date().toISOString();
-            const { data, error } = await supabaseClient
-                .from('stories')
-                .select('*')
-                .gt('expires_at', nowIso)
-                .order('created_at', { ascending: false });
-
+            container.innerHTML = `<div class="story-item" onclick="triggerUploadStory()"><div class="story-circle">+</div><span>قصتي</span></div>`;
+            const { data } = await supabaseClient.from('stories').select('*').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false });
             if (data) {
                 data.forEach(story => {
-                    container.innerHTML += `
-                        <div class="story-item" onclick='openStoryModal(${JSON.stringify(story)})'>
-                            <div class="story-circle">
-                                <img src="${story.media_url}" alt="story">
-                            </div>
-                            <span>${story.username}</span>
-                        </div>
-                    `;
+                    container.innerHTML += `<div class="story-item" onclick='openStoryModal(${JSON.stringify(story)})'><div class="story-circle"><img src="${story.media_url}" alt="story"></div><span>${story.username}</span></div>`;
                 });
             }
         }
@@ -425,211 +497,22 @@
             document.getElementById('modalImage').src = story.media_url;
             document.getElementById('modalUsernameHeader').innerText = story.username;
             document.getElementById('storyModal').style.display = 'flex';
-
-            let currentUsername = localStorage.getItem('perm_username');
-            let ownerActions = document.getElementById('storyOwnerActions');
-
-            if (story.username === currentUsername) {
-                ownerActions.style.display = 'flex';
-            } else {
-                ownerActions.style.display = 'none';
-            }
-
-            if (story.username !== currentUsername) {
-                await supabaseClient
-                    .from('story_views')
-                    .upsert([{ story_id: story.id, username: currentUsername }], { onConflict: 'story_id,username' });
-            }
-
-            await updateStoryStats(story.id);
         }
 
-        async function updateStoryStats(storyId) {
-            const { count: viewsCount } = await supabaseClient
-                .from('story_views')
-                .select('*', { count: 'exact', head: true })
-                .eq('story_id', storyId);
-
-            const { count: likesCount } = await supabaseClient
-                .from('story_likes')
-                .select('*', { count: 'exact', head: true })
-                .eq('story_id', storyId);
-
-            document.getElementById('viewsCount').innerText = viewsCount || 0;
-            document.getElementById('likesCount').innerText = likesCount || 0;
-        }
-
-        async function toggleLikeStory() {
-            if (!currentActiveStoryId) return;
-            let currentUsername = localStorage.getItem('perm_username');
-
-            const { data: existingLike } = await supabaseClient
-                .from('story_likes')
-                .select('*')
-                .eq('story_id', currentActiveStoryId)
-                .eq('username', currentUsername)
-                .single();
-
-            if (existingLike) {
-                await supabaseClient
-                    .from('story_likes')
-                    .delete()
-                    .eq('story_id', currentActiveStoryId)
-                    .eq('username', currentUsername);
-                showMessage("تم إلغاء الإعجاب 🤍");
-            } else {
-                await supabaseClient
-                    .from('story_likes')
-                    .insert([{ story_id: currentActiveStoryId, username: currentUsername }]);
-                showMessage("تم الإعجاب ❤️");
-            }
-
-            await updateStoryStats(currentActiveStoryId);
-        }
-
-        async function openViewersList() {
-            if (!currentActiveStoryId) return;
-            let container = document.getElementById('viewersListContainer');
-            container.innerHTML = "جاري التحميل...";
-            document.getElementById('viewersModal').style.display = 'block';
-
-            const { data: views } = await supabaseClient
-                .from('story_views')
-                .select('username, created_at')
-                .eq('story_id', currentActiveStoryId);
-
-            const { data: likes } = await supabaseClient
-                .from('story_likes')
-                .select('username')
-                .eq('story_id', currentActiveStoryId);
-
-            let likedUsers = new Set(likes ? likes.map(l => l.username) : []);
-
-            if (views && views.length > 0) {
-                container.innerHTML = "";
-                views.forEach(v => {
-                    let hasLiked = likedUsers.has(v.username) ? " ❤️ تفاعل بإعجاب" : "";
-                    container.innerHTML += `<div class="viewer-item">👤 <strong>${v.username}</strong> ${hasLiked}</div>`;
-                });
-            } else {
-                container.innerHTML = "<p style='color:#777; font-size:14px;'>لا توجد مشاهدات حتى الآن.</p>";
-            }
-        }
-
-        function closeViewersList() {
-            document.getElementById('viewersModal').style.display = 'none';
-        }
-
-        function closeStoryModal() {
-            document.getElementById('storyModal').style.display = 'none';
-            closeViewersList();
-            currentActiveStoryId = null;
-        }
-
-        function confirmDeleteStory() {
-            let overlayBox = document.createElement("div");
-            overlayBox.id = "customConfirmBox";
-            overlayBox.style.position = "fixed";
-            overlayBox.style.top = "0";
-            overlayBox.style.left = "0";
-            overlayBox.style.width = "100%";
-            overlayBox.style.height = "100%";
-            overlayBox.style.background = "rgba(0,0,0,0.6)";
-            overlayBox.style.zIndex = "4000";
-            overlayBox.style.display = "flex";
-            overlayBox.style.justifyContent = "center";
-            overlayBox.style.alignItems = "center";
-
-            overlayBox.innerHTML = `
-                <div style="background:#fff; padding:20px; border-radius:10px; width:80%; max-width:300px; text-align:center; color:#333;">
-                    <p style="margin-bottom:15px; font-size:15px; font-weight:bold;">هل أنت متأكد من حذف الستوري؟</p>
-                    <div style="display:flex; gap:10px; justify-content:center;">
-                        <button id="yesDeleteBtn" style="background:#dc3545; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">نعم، حذف</button>
-                        <button id="noDeleteBtn" style="background:#6c757d; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">إلغاء</button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(overlayBox);
-
-            document.getElementById('yesDeleteBtn').onclick = async function() {
-                overlayBox.remove();
-                await executeDeleteStory();
-            };
-
-            document.getElementById('noDeleteBtn').onclick = function() {
-                overlayBox.remove();
-            };
-        }
-
-        async function executeDeleteStory() {
-            if (!currentActiveStoryId) return;
-
-            const { error } = await supabaseClient
-                .from('stories')
-                .delete()
-                .eq('id', currentActiveStoryId);
-
-            if (!error) {
-                showMessage("تم الحذف بنجاح 🗑");
-                closeStoryModal();
-                loadStories();
-            } else {
-                showMessage("خطأ أثناء الحذف");
-            }
-        }
-
-        function triggerEditStory() {
-            document.getElementById('story-edit-input').click();
-        }
-
-        async function updateStoryImage(input) {
-            if (!input.files[0] || !currentActiveStoryId) return;
-
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const newImage = e.target.result;
-
-                const { error } = await supabaseClient
-                    .from('stories')
-                    .update({ media_url: newImage })
-                    .eq('id', currentActiveStoryId);
-
-                if (!error) {
-                    showMessage("تم التعديل بنجاح ✏️");
-                    document.getElementById('modalImage').src = newImage;
-                    loadStories();
-                } else {
-                    showMessage("خطأ أثناء التعديل");
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+        function closeStoryModal() { document.getElementById('storyModal').style.display = 'none'; }
 
         function showMessage(text) {
             let msg = document.createElement("div");
             msg.innerHTML = text;
-            msg.style.position = "fixed";
-            msg.style.bottom = "90px";
-            msg.style.left = "50%";
-            msg.style.transform = "translateX(-50%)";
-            msg.style.background = "#007bff";
-            msg.style.color = "white";
-            msg.style.padding = "12px 20px";
-            msg.style.borderRadius = "20px";
-            msg.style.zIndex = "9999";
-            msg.style.fontSize = "15px";
-
+            msg.style.position = "fixed"; msg.style.bottom = "90px"; msg.style.left = "50%"; msg.style.transform = "translateX(-50%)";
+            msg.style.background = "#007bff"; msg.style.color = "white"; msg.style.padding = "12px 20px"; msg.style.borderRadius = "20px"; msg.style.zIndex = "9999"; msg.style.fontSize = "15px";
             document.body.appendChild(msg);
-
-            setTimeout(() => {
-                msg.remove();
-            }, 2500);
+            setTimeout(() => { msg.remove(); }, 2500);
         }
 
         function openNotifications() {}
         function openExams() {}
+        function closeViewersList() { document.getElementById('viewersModal').style.display = 'none'; }
     </script>
 </body>
 </html>
