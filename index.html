@@ -11,40 +11,39 @@
 
     <!-- الشريط العلوي -->
     <header class="top-bar">
-        <div class="menu-icon" id="open-sidebar-btn">☰</div>
+        <div class="menu-icon" onclick="document.getElementById('sidebar').classList.add('open')">☰</div>
         <div class="logo-title">منصة الطالب</div>
-        <div class="notifications-icon" id="open-notifications-btn">🔔<span id="notif-badge">0</span></div>
+        <div class="notifications-icon" onclick="openNotificationsModal()">🔔<span id="notif-badge">0</span></div>
     </header>
 
     <!-- الشريط السفلي للتنقل -->
     <nav class="bottom-nav">
-        <button class="nav-item active" data-target="home-section">الرئيسية</button>
-        <button class="nav-item" data-target="stages-section">المراحل</button>
-        <button class="nav-item" data-target="search-section">بحث</button>
-        <button class="nav-item" data-target="library-section">المكتبة</button>
-        <button class="nav-item" data-target="quizzes-section">الاختبارات</button>
-        <button class="nav-item" data-target="favorites-section">المفضلة</button>
+        <button class="nav-item active" onclick="switchSection('home-section', this)">الرئيسية</button>
+        <button class="nav-item" onclick="switchSection('stages-section', this)">المراحل</button>
+        <button class="nav-item" onclick="switchSection('search-section', this)">بحث</button>
+        <button class="nav-item" onclick="switchSection('library-section', this)">المكتبة</button>
+        <button class="nav-item" onclick="switchSection('quizzes-section', this)">الاختبارات</button>
+        <button class="nav-item" onclick="switchSection('favorites-section', this)">المفعلة</button>
     </nav>
 
     <!-- القائمة الجانبية (الملف الشخصي والحساب) -->
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <h3>حساب المستخدم</h3>
-            <button id="close-sidebar-btn">✕</button>
+            <button onclick="document.getElementById('sidebar').classList.remove('open')">✕</button>
         </div>
         <div class="sidebar-body">
-            <!-- صورة الملف الشخصي داخل القائمة الجانبية -->
             <div class="sidebar-profile-info">
                 <img id="sidebar-avatar" src="images/default-avatar.png" alt="صورة الملف الشخصي" class="avatar-img">
                 <p id="user-email-display">جاري التحميل...</p>
                 <p id="user-phone-display"></p>
             </div>
             <div class="sidebar-links">
-                <button id="profile-edit-btn">تعديل الملف الشخصي</button>
-                <button id="referral-btn">رمز الإحالة ودعوة صديق</button>
-                <button id="whatsapp-support-btn">التواصل عبر واتساب</button>
-                <button id="settings-btn">الإعدادات والوضع الليلي</button>
-                <button id="logout-btn">تسجيل الخروج</button>
+                <button onclick="alert('تعديل الملف الشخصي قيد التطوير')">تعديل الملف الشخصي</button>
+                <button onclick="openReferralModal()">رمز الإحالة ودعوة صديق</button>
+                <button onclick="window.open('https://wa.me/9640000000000', '_blank')">التواصل عبر واتساب</button>
+                <button onclick="alert('الإعدادات')">الإعدادات والوضع الليلي</button>
+                <button onclick="alert('تسجيل الخروج')">تسجيل الخروج</button>
             </div>
         </div>
     </div>
@@ -52,20 +51,17 @@
     <!-- المحتوى الرئيسي -->
     <main class="main-content">
 
-        <!-- قسم الرئيسية (الستوري + أحدث الملفات + المواد الأكثر تحميلًا) -->
+        <!-- قسم الرئيسية -->
         <section id="home-section" class="app-section active">
-            <!-- شريط الستوري -->
             <div class="stories-container" id="stories-wrapper">
-                <div class="add-story-btn" id="add-story-trigger">➕ إضافة ستوري</div>
+                <div class="add-story-btn" onclick="addNewStory()">➕ إضافة ستوري</div>
             </div>
 
             <!-- أزرار تحكم الأدمن A1 -->
             <div id="admin-controls-panel" class="admin-panel" style="display: none;">
                 <h3>لوحة تحكم الأدمن (A1)</h3>
-                <button id="admin-add-material">إضافة مادة / ملف (PDF, Word, PPT)</button>
-                <button id="admin-add-teacher">إضافة / تعديل / حذف أستاذ</button>
-                <button id="admin-manage-stages">إدارة المراحل والصفوف والجامعات</button>
-                <button id="admin-send-notification">إرسال إشعار عام / خاص</button>
+                <button onclick="document.getElementById('file-upload-modal').style.display = 'flex'">إضافة مادة / ملف (PDF, Word, PPT)</button>
+                <button onclick="sendAdminNotification()">إرسال إشعار عام / خاص</button>
             </div>
 
             <div class="content-block">
@@ -79,17 +75,15 @@
             </div>
         </section>
 
-        <!-- قسم المراحل الدراسية والجامعة -->
+        <!-- قسم المراحل الدراسية -->
         <section id="stages-section" class="app-section">
             <h2>المراحل الدراسية</h2>
             <div class="stages-grid">
-                <div class="stage-card" data-stage="primary">الابتدائي (الأول - السادس)</div>
-                <div class="stage-card" data-stage="middle">المتوسط (الأول - الثالث)</div>
-                <div class="stage-card" data-stage="prep">الإعدادي (الرابع - السادس)</div>
-                <div class="stage-card" data-stage="university">الجامعة (جامعة، كلية، قسم، مرحلة)</div>
+                <div class="stage-card" onclick="loadSubStages('primary')">الابتدائي (الأول - السادس)</div>
+                <div class="stage-card" onclick="loadSubStages('middle')">المتوسط (الأول - الثالث)</div>
+                <div class="stage-card" onclick="loadSubStages('prep')">الإعدادي (الرابع - السادس)</div>
+                <div class="stage-card" onclick="loadUniversityStructure()">الجامعة (جامعة، كلية، قسم، مرحلة)</div>
             </div>
-            
-            <!-- حاويات الهيكل الأكاديمي والصفوف والمواد -->
             <div id="university-structure-container"></div>
             <div id="sub-stages-container"></div>
             <div id="subjects-grid-container"></div>
@@ -98,86 +92,54 @@
         <!-- قسم البحث -->
         <section id="search-section" class="app-section">
             <h2>بحث متقدم</h2>
-            <input type="text" id="search-input" placeholder="ابحث عن مادة، مدرس، جامعة، كلية، أو قسم...">
+            <input type="text" id="search-input" placeholder="ابحث عن مادة، مدرس، جامعة..." oninput="handleSearch(this.value)">
             <div id="search-results-container"></div>
         </section>
 
         <!-- قسم المكتبة -->
         <section id="library-section" class="app-section">
             <h2>المكتبة الشاملة</h2>
-            <div class="library-filters">
-                <button class="lib-filter" data-type="books">كتب</button>
-                <button class="lib-filter" data-type="notes">ملازم</button>
-                <button class="lib-filter" data-type="exams">أسئلة وزارية</button>
-                <button class="lib-filter" data-type="models">نماذج</button>
-            </div>
-            <div id="library-content-container"></div>
+            <div id="library-content-container"><p>محتوى المكتبة قريباً</p></div>
         </section>
 
         <!-- قسم الاختبارات -->
         <section id="quizzes-section" class="app-section">
             <h2>الاختبارات والامتحانات</h2>
-            <div id="quizzes-list-container"></div>
+            <div id="quizzes-list-container"><p>لا توجد اختبارات حالياً</p></div>
         </section>
 
         <!-- قسم المفضلة -->
         <section id="favorites-section" class="app-section">
             <h2>المفضلة والمحظوظات</h2>
-            <div class="fav-tabs">
-                <button class="fav-tab" data-target="fav-subjects">المواد المحفوظة</button>
-                <button class="fav-tab" data-target="fav-teachers">المدرسين المتابعين</button>
-                <button class="fav-tab" data-target="fav-files">الملفات المحفوظة</button>
-            </div>
-            <div id="favorites-container"></div>
+            <div id="favorites-container"><p>قائمة المفضلة فارغة</p></div>
         </section>
 
     </main>
 
-    <!-- النوافذ المنبثقة (Modals) الشاملة -->
-
-    <!-- 1. نافذة التسجيل الإجباري الأولي -->
+    <!-- النوافذ المنبثقة -->
     <div id="mandatory-signup-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <h3>استكمال بيانات الحساب الإجبارية</h3>
             <input type="text" id="reg-fullname" placeholder="الاسم الكامل" required>
             <input type="text" id="reg-username" placeholder="اسم المستخدم (اليوزر)" required>
             <input type="tel" id="reg-phone" placeholder="رقم الهاتف" required>
-            <input type="email" id="reg-email" placeholder="البريد الإلكتروني" required>
-            <input type="file" id="reg-avatar" accept="image/*">
-            <button id="submit-mandatory-signup-btn">حفظ ومتابعة</button>
+            <button onclick="submitSignup()">حفظ ومتابعة</button>
         </div>
     </div>
 
-    <!-- 2. نافذة عرض وتفاعل الستوري (مع المشاهدات، التفاعلات، الحذف والتعديل) -->
     <div id="story-modal" class="modal" style="display: none;">
         <div class="modal-content story-modal-content">
-            <span class="close-modal" id="close-story-modal">✕</span>
+            <span class="close-modal" onclick="document.getElementById('story-modal').style.display='none'">✕</span>
             <div id="story-viewer-body">
-                <!-- عرض الوسائط -->
                 <div id="story-media-container"></div>
-                <!-- معلومات المشاهدات وصاحب الستوري -->
-                <div class="story-meta-info">
-                    <span id="story-views-count">👁️ 0 مشاهدات</span>
-                    <div id="story-owner-actions" style="display: none;">
-                        <button id="edit-story-btn">تعديل</button>
-                        <button id="delete-story-btn">حذف</button>
-                    </div>
-                </div>
-                <!-- أزرار التفاعلات -->
-                <div class="story-reactions-bar">
-                    <button class="reaction-btn" data-reaction="love">❤️</button>
-                    <button class="reaction-btn" data-reaction="like">👍</button>
-                    <button class="reaction-btn" data-reaction="wow">😮</button>
-                    <button class="reaction-btn" data-reaction="sad">😢</button>
-                </div>
+                <div class="story-meta-info"><span id="story-views-count">👁️ 0 مشاهدات</span></div>
             </div>
         </div>
     </div>
 
-    <!-- 3. نافذة رفع وتعديل الملفات (PDF, Word, PowerPoint) للأدمن -->
     <div id="file-upload-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close-modal" id="close-file-modal">✕</span>
+            <span class="close-modal" onclick="document.getElementById('file-upload-modal').style.display='none'">✕</span>
             <h3>رفع ملف تعليمي جديد</h3>
             <input type="text" id="file-name-input" placeholder="اسم الملف">
             <textarea id="file-desc-input" placeholder="وصف الملف"></textarea>
@@ -185,36 +147,37 @@
                 <option value="pdf">PDF</option>
                 <option value="word">Word</option>
                 <option value="ppt">PowerPoint</option>
-                <option value="image">صورة</option>
-                <option value="video">فيديو</option>
-                <option value="zip">ZIP</option>
-                <option value="link">رابط خارجي</option>
             </select>
             <input type="file" id="actual-file-input">
-            <button id="save-file-upload-btn">رفع وحفظ</button>
+            <button onclick="uploadNewFile()">رفع وحفظ</button>
         </div>
     </div>
 
-    <!-- 4. نافذة الإشعارات -->
     <div id="notifications-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close-modal" id="close-notif-modal">✕</span>
+            <span class="close-modal" onclick="document.getElementById('notifications-modal').style.display='none'">✕</span>
             <h3>الإشعارات</h3>
             <div id="notifications-list"></div>
         </div>
     </div>
 
-    <!-- 5. نافذة دعوة صديق ورمز الإحالة -->
     <div id="referral-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close-modal" id="close-referral-modal">✕</span>
+            <span class="close-modal" onclick="document.getElementById('referral-modal').style.display='none'">✕</span>
             <h3>دعوة الأصدقاء ورمز الإحالة</h3>
-            <p>شارك رمز الإحالة الخاص بك مع أصدقائك:</p>
             <div id="user-referral-code" class="code-box">---</div>
-            <button id="copy-referral-btn">نسخ الرمز</button>
         </div>
     </div>
 
+    <!-- ملف السكريبت المساعد للتفاعل الفوري -->
+    <script>
+        function switchSection(targetId, btn) {
+            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
