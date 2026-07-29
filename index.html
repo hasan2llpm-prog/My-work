@@ -39,12 +39,22 @@
         .story-item span { font-size: 11px; display: block; margin-top: 5px; }
 
         .stages-section { padding: 15px; }
-        .stage-card { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; position: relative; }
+        .stages-section > h3 { margin-bottom: 15px; color: #333; font-size: 17px; }
+        .stage-card { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: bold; font-size: 15px; }
         
-        .stage-actions { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; padding: 12px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 10; gap: 10px; }
-        .stage-actions.active { display: flex; }
-        .stage-actions button { flex: 1; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .stage-admin-upload { background: #28a745 !important; display: none; } /* زر الرفع الخاص بك */
+        .stage-content { display: none; background: #fff; padding: 15px; margin-top: -5px; margin-bottom: 10px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stage-content.active { display: block; }
+
+        .subject-box { background: #f8f9fa; border: 1px solid #e9ecef; padding: 12px; border-radius: 6px; margin-bottom: 12px; }
+        .subject-title { font-weight: bold; color: #007bff; margin-bottom: 8px; font-size: 14px; }
+        
+        .prof-card { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 13px; }
+        .prof-info-text { color: #555; margin: 5px 0; font-size: 12px; white-space: pre-wrap; }
+        .prof-actions-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+        .prof-actions-row a, .prof-actions-row button { padding: 5px 10px; font-size: 12px; border-radius: 4px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; }
+        .btn-download-file { background: #28a745; color: #fff; }
+        .admin-only-control { background: #dc3545; color: #fff; display: none; }
+        .admin-add-prof { background: #007bff; color: #fff; margin-top: 8px; width: 100%; padding: 8px; font-size: 13px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; display: none; }
 
         .bottom-grid { position: fixed; bottom: 0; left: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-top: 1px solid #ddd; text-align: center; z-index: 100; }
         .grid-box { padding: 12px 2px; font-size: 11px; border-right: 1px solid #eee; cursor: pointer; background: #fff; color: #555; }
@@ -69,7 +79,6 @@
         #customPromptCancel { background: #e0e0e0; color: #333; }
         #customPromptConfirm { background: #1976D2; color: white; }
 
-        /* نافذة الإشعارات */
         .notifications-modal { position: fixed; top: 0; right: -100%; width: 100%; max-width: 360px; height: 100%; background: #fff; box-shadow: -5px 0 15px rgba(0,0,0,0.2); transition: 0.3s; z-index: 3000; padding: 20px; overflow-y: auto; direction: rtl; }
         .notifications-modal.active { right: 0; }
         .notifications-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
@@ -77,7 +86,6 @@
         .notif-card { background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #007bff; font-size: 13px; color: #333; }
         .notif-card span { display: block; font-size: 10px; color: #888; margin-top: 5px; }
 
-        /* نافذة الستوري */
         .story-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: #fff; }
         .story-modal-header { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 3001; }
         .story-user-info { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; }
@@ -126,7 +134,21 @@
         </div>
     </div>
 
-    <!-- نافذة إرسال إشعار للجميع (تظهر حصراً ليوزرك A1) -->
+    <!-- نافذة إضافة أستاذ (تظهر فقط ليوزرك A1) -->
+    <div class="custom-prompt-overlay" id="profModal" style="display: none;">
+        <div class="custom-prompt-box">
+            <h3 id="profModalTitle">إضافة أستاذ جديد للمادة</h3>
+            <input type="text" id="profNameInput" placeholder="اسم الأستاذ الكامل">
+            <textarea id="profInfoInput" placeholder="معلومات عن الأستاذ (نبذة، ساعات، تفاصيل...)" rows="3"></textarea>
+            <label style="font-size: 13px; font-weight: bold; color: #555; display: block; margin-top: 5px;">ملف الأستاذ (ملف / PDF / صورة):</label>
+            <input type="file" id="profFileInput" style="margin-top: 5px;">
+            <div class="custom-prompt-actions" style="margin-top: 15px;">
+                <button onclick="closeProfModal()">إلغاء</button>
+                <button onclick="saveProfessorData()" style="background: #28a745; color: #fff;">حفظ ونشر</button>
+            </div>
+        </div>
+    </div>
+
     <div class="custom-prompt-overlay" id="broadcastModal" style="display: none;">
         <div class="custom-prompt-box">
             <h3>📢 إرسال إشعار للجميع</h3>
@@ -138,7 +160,6 @@
         </div>
     </div>
 
-    <!-- نافذة عرض الإشعارات -->
     <div class="notifications-modal" id="notificationsModal">
         <div class="notifications-header">
             <h3>الإشعارات الواردة</h3>
@@ -194,54 +215,79 @@
         </div>
     </div>
 
+    <!-- المراحل الدراسية والمواد المطلوبة (بدون أيقونات) -->
     <div class="stages-section">
         <h3>المراحل الدراسية</h3>
         
-        <div style="position: relative; margin-bottom: 15px;">
-            <div class="stage-card" onclick="toggleStage(1)">
-                <span>المرحلة الأولى</span>
-                <span>▼</span>
+        <!-- المرحلة الابتدائية -->
+        <div class="stage-card" onclick="toggleStage('primary')">
+            <span>المرحلة الابتدائية</span>
+            <span>▼</span>
+        </div>
+        <div id="stage-primary-content" class="stage-content">
+            <div class="subject-box">
+                <div class="subject-title">اللغة العربية</div>
+                <div class="prof-list-container" data-subject="اللغة العربية - المرحلة الابتدائية"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الابتدائية', 'اللغة العربية')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
-            <div id="stage-1-actions" class="stage-actions">
-                <button onclick="location.href='browse.html?stage=1'">تصفح الملفات</button>
-                <button onclick="location.href='download.html?stage=1'">تحميل الملفات</button>
-                <button class="stage-admin-upload" onclick="location.href='upload.html?stage=1'">رفع ملف</button>
+            <div class="subject-box">
+                <div class="subject-title">الرياضيات</div>
+                <div class="prof-list-container" data-subject="الرياضيات - المرحلة الابتدائية"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الابتدائية', 'الرياضيات')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
         </div>
 
-        <div style="position: relative; margin-bottom: 15px;">
-            <div class="stage-card" onclick="toggleStage(2)">
-                <span>المرحلة الثانية</span>
-                <span>▼</span>
+        <!-- المرحلة المتوسطة -->
+        <div class="stage-card" onclick="toggleStage('intermediate')">
+            <span>المرحلة المتوسطة</span>
+            <span>▼</span>
+        </div>
+        <div id="stage-intermediate-content" class="stage-content">
+            <div class="subject-box">
+                <div class="subject-title">اللغة الإنجليزية</div>
+                <div class="prof-list-container" data-subject="اللغة الإنجليزية - المرحلة المتوسطة"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة المتوسطة', 'اللغة الإنجليزية')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
-            <div id="stage-2-actions" class="stage-actions">
-                <button onclick="location.href='browse.html?stage=2'">تصفح الملفات</button>
-                <button onclick="location.href='download.html?stage=2'">تحميل الملفات</button>
-                <button class="stage-admin-upload" onclick="location.href='upload.html?stage=2'">رفع ملف</button>
+            <div class="subject-box">
+                <div class="subject-title">العلوم العامة</div>
+                <div class="prof-list-container" data-subject="العلوم العامة - المرحلة المتوسطة"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة المتوسطة', 'العلوم العامة')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
         </div>
 
-        <div style="position: relative; margin-bottom: 15px;">
-            <div class="stage-card" onclick="toggleStage(3)">
-                <span>المرحلة الثالثة</span>
-                <span>▼</span>
+        <!-- المرحلة الاعدادية -->
+        <div class="stage-card" onclick="toggleStage('secondary')">
+            <span>المرحلة الاعدادية</span>
+            <span>▼</span>
+        </div>
+        <div id="stage-secondary-content" class="stage-content">
+            <div class="subject-box">
+                <div class="subject-title">الفيزياء</div>
+                <div class="prof-list-container" data-subject="الفيزياء - المرحلة الاعدادية"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الاعدادية', 'الفيزياء')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
-            <div id="stage-3-actions" class="stage-actions">
-                <button onclick="location.href='browse.html?stage=3'">تصفح الملفات</button>
-                <button onclick="location.href='download.html?stage=3'">تحميل الملفات</button>
-                <button class="stage-admin-upload" onclick="location.href='upload.html?stage=3'">رفع ملف</button>
+            <div class="subject-box">
+                <div class="subject-title">الكيمياء</div>
+                <div class="prof-list-container" data-subject="الكيمياء - المرحلة الاعدادية"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الاعدادية', 'الكيمياء')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
         </div>
 
-        <div style="position: relative; margin-bottom: 15px;">
-            <div class="stage-card" onclick="toggleStage(4)">
-                <span>المرحلة الرابعة</span>
-                <span>▼</span>
+        <!-- الجامعة -->
+        <div class="stage-card" onclick="toggleStage('university')">
+            <span>الجامعة</span>
+            <span>▼</span>
+        </div>
+        <div id="stage-university-content" class="stage-content">
+            <div class="subject-box">
+                <div class="subject-title">البرمجة المتقدمة</div>
+                <div class="prof-list-container" data-subject="البرمجة المتقدمة - الجامعة"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('الجامعة', 'البرمجة المتقدمة')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
-            <div id="stage-4-actions" class="stage-actions">
-                <button onclick="location.href='browse.html?stage=4'">تصفح الملفات</button>
-                <button onclick="location.href='download.html?stage=4'">تحميل الملفات</button>
-                <button class="stage-admin-upload" onclick="location.href='upload.html?stage=4'">رفع ملف</button>
+            <div class="subject-box">
+                <div class="subject-title">قواعد البيانات</div>
+                <div class="prof-list-container" data-subject="قواعد البيانات - الجامعة"></div>
+                <button class="admin-add-prof" onclick="openAddProfModal('الجامعة', 'قواعد البيانات')">+ إضافة أستاذ ومعلومات وملف</button>
             </div>
         </div>
     </div>
@@ -332,9 +378,13 @@
         let currentActiveStoryId = null;
         let currentActiveStoryOwner = null;
         let selectedAvatarBase64 = null;
+        
+        let targetStageForProf = '';
+        let targetSubjectForProf = '';
 
         initApp();
         loadStories();
+        loadProfessorsData();
 
         supabaseClient.channel('public:stories')
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'stories' }, payload => {
@@ -406,14 +456,17 @@
                     loadUserNotifications(data.username);
                     setupNotificationsListener(data.username);
                     
-                    // 🔒 إظهار أزرار التحكم والرفع الخاصة بك حصراً ليوزرك A1
-                    let adminUploadBtns = document.querySelectorAll('.stage-admin-upload');
+                    let addProfBtns = document.querySelectorAll('.admin-add-prof');
+                    let adminControlBtns = document.querySelectorAll('.admin-only-control');
+                    
                     if (data.username === 'A1') { 
                         document.getElementById('broadcastBtn').style.display = 'block';
-                        adminUploadBtns.forEach(btn => btn.style.display = 'block');
+                        addProfBtns.forEach(btn => btn.style.display = 'block');
+                        adminControlBtns.forEach(btn => btn.style.display = 'inline-block');
                     } else {
                         document.getElementById('broadcastBtn').style.display = 'none';
-                        adminUploadBtns.forEach(btn => btn.style.display = 'none');
+                        addProfBtns.forEach(btn => btn.style.display = 'none');
+                        adminControlBtns.forEach(btn => btn.style.display = 'none');
                     }
                 }
 
@@ -565,11 +618,121 @@
             document.getElementById('overlay').classList.toggle('active');
         }
 
-        function toggleStage(num) {
-            for(let i=1; i<=4; i++) {
-                if(i !== num) { document.getElementById(`stage-${i}-actions`).classList.remove('active'); }
+        function toggleStage(stageKey) {
+            const content = document.getElementById(`stage-${stageKey}-content`);
+            content.classList.toggle('active');
+        }
+
+        function openAddProfModal(stageName, subjectName) {
+            targetStageForProf = stageName;
+            targetSubjectForProf = subjectName;
+            document.getElementById('profModalTitle').innerText = `إضافة أستاذ لـ: ${subjectName}`;
+            document.getElementById('profNameInput').value = '';
+            document.getElementById('profInfoInput').value = '';
+            document.getElementById('profFileInput').value = '';
+            document.getElementById('profModal').style.display = 'flex';
+        }
+
+        function closeProfModal() {
+            document.getElementById('profModal').style.display = 'none';
+        }
+
+        async function saveProfessorData() {
+            let profName = document.getElementById('profNameInput').value.trim();
+            let profInfo = document.getElementById('profInfoInput').value.trim();
+            let fileInput = document.getElementById('profFileInput');
+
+            if (!profName) {
+                showMessage("يرجى إدخال اسم الأستاذ على الأقل");
+                return;
             }
-            document.getElementById(`stage-${num}-actions`).classList.toggle('active');
+
+            if (fileInput.files.length > 0) {
+                let file = fileInput.files[0];
+                let fileExt = file.name.split('.').pop();
+                let fileName = `${Date.now()}_${Math.random().toString(36.substring(2,7))}.${fileExt}`;
+                
+                showMessage("جاري رفع الملف...");
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('professors-files')
+                    .upload(fileName, file);
+
+                if (uploadError) {
+                    showMessage("خطأ في رفع الملف: " + uploadError.message);
+                    return;
+                }
+
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('professors-files')
+                    .getPublicUrl(fileName);
+
+                await insertProfToDb(profName, profInfo, publicUrlData.publicUrl, file.name);
+            } else {
+                await insertProfToDb(profName, profInfo, '', '');
+            }
+        }
+
+        async function insertProfToDb(name, info, fileUrl, fileName) {
+            const { error } = await supabaseClient.from('professors').insert([{
+                stage: targetStageForProf,
+                subject: targetSubjectForProf,
+                prof_name: name,
+                prof_info: info,
+                file_url: fileUrl,
+                file_name: fileName
+            }]);
+
+            if (!error) {
+                showMessage("تمت إضافة الأستاذ وملفه بنجاح ✅");
+                closeProfModal();
+                loadProfessorsData();
+            } else {
+                showMessage("خطأ أثناء الحفظ في قاعدة البيانات");
+            }
+        }
+
+        async function loadProfessorsData() {
+            const { data } = await supabaseClient.from('professors').select('*');
+            
+            document.querySelectorAll('.prof-list-container').forEach(el => el.innerHTML = '');
+
+            if (data && data.length > 0) {
+                let username = document.getElementById('profile-username').innerText;
+                let isAdmin = (username === 'A1');
+
+                data.forEach(item => {
+                    document.querySelectorAll('.prof-list-container').forEach(container => {
+                        let targetIdentifier = `${item.subject} - ${item.stage}`;
+                        if (container.getAttribute('data-subject') === targetIdentifier) {
+                            
+                            let fileDownloadHtml = item.file_url ? `<a href="${item.file_url}" target="_blank" download="${item.file_name || 'file'}" class="btn-download-file">📥 تحميل الملف (${item.file_name || 'ملف المادة'})</a>` : `<span style="color:#888; font-size:11px;">لا يوجد ملف مرفوع</span>`;
+                            let deleteBtnHtml = isAdmin ? `<button class="admin-only-control" style="display:inline-block;" onclick="deleteProfessor(${item.id})">حذف</button>` : '';
+
+                            container.innerHTML += `
+                                <div class="prof-card">
+                                    <div style="font-weight:bold; color:#333;">👨‍🏫 ${item.prof_name}</div>
+                                    <div class="prof-info-text">${item.prof_info || 'لا توجد معلومات إضافية.'}</div>
+                                    <div class="prof-actions-row">
+                                        ${fileDownloadHtml}
+                                        ${deleteBtnHtml}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                });
+            }
+        }
+
+        async function deleteProfessor(id) {
+            if (!confirm("هل أنت متأكد من حذف هذا الأستاذ ومعلوماته وملفه؟")) return;
+            const { error } = await supabaseClient.from('professors').delete().eq('id', id);
+            if (!error) {
+                showMessage("تم الحذف بنجاح 🗑");
+                loadProfessorsData();
+            } else {
+                showMessage("حدث خطأ أثناء الحذف");
+            }
         }
 
         function triggerUploadStory() { document.getElementById('story-file-input').click(); }
@@ -762,7 +925,6 @@
             setTimeout(() => { msg.remove(); }, 2500);
         }
 
-        function openNotifications() {}
         function openExams() {}
     </script>
 </body>
