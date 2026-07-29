@@ -23,10 +23,10 @@
         <button class="nav-item" onclick="switchSection('search-section', this)">بحث</button>
         <button class="nav-item" onclick="switchSection('library-section', this)">المكتبة</button>
         <button class="nav-item" onclick="switchSection('quizzes-section', this)">الاختبارات</button>
-        <button class="nav-item" onclick="switchSection('favorites-section', this)">المفعلة</button>
+        <button class="nav-item" onclick="switchSection('favorites-section', this)">المفضلة</button>
     </nav>
 
-    <!-- القائمة الجانبية (الملف الشخصي والحساب) -->
+    <!-- القائمة الجانبية -->
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <h3>حساب المستخدم</h3>
@@ -42,7 +42,7 @@
                 <button onclick="alert('تعديل الملف الشخصي قيد التطوير')">تعديل الملف الشخصي</button>
                 <button onclick="openReferralModal()">رمز الإحالة ودعوة صديق</button>
                 <button onclick="window.open('https://wa.me/9640000000000', '_blank')">التواصل عبر واتساب</button>
-                <button onclick="alert('الإعدادات')">الإعدادات والوضع الليلي</button>
+                <button onclick="alert('الإعدادات والوضع الليلي')">الإعدادات والوضع الليلي</button>
                 <button onclick="alert('تسجيل الخروج')">تسجيل الخروج</button>
             </div>
         </div>
@@ -117,16 +117,6 @@
     </main>
 
     <!-- النوافذ المنبثقة -->
-    <div id="mandatory-signup-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h3>استكمال بيانات الحساب الإجبارية</h3>
-            <input type="text" id="reg-fullname" placeholder="الاسم الكامل" required>
-            <input type="text" id="reg-username" placeholder="اسم المستخدم (اليوزر)" required>
-            <input type="tel" id="reg-phone" placeholder="رقم الهاتف" required>
-            <button onclick="submitSignup()">حفظ ومتابعة</button>
-        </div>
-    </div>
-
     <div id="story-modal" class="modal" style="display: none;">
         <div class="modal-content story-modal-content">
             <span class="close-modal" onclick="document.getElementById('story-modal').style.display='none'">✕</span>
@@ -169,13 +159,15 @@
         </div>
     </div>
 
-    <!-- ملف السكريبت المساعد للتفاعل الفوري -->
+    <!-- دوال واجهة المستخدم السريعة -->
     <script>
         function switchSection(targetId, btn) {
             document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
+            const target = document.getElementById(targetId);
+            if (target) target.classList.add('active');
+            
             document.querySelectorAll('.bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
         }
     </script>
     <script src="app.js"></script>
