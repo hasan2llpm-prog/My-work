@@ -8,19 +8,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadLatestFiles();
     loadStories();
     loadNotificationsCount();
+    checkUserProfile();
+});
+
+// --- فحص ملف المستخدم وعرض البيانات ---
+async function checkUserProfile() {
     try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             document.getElementById('user-email-display').innerText = user.email;
+            // جلب البيانات الإضافية إن وجدت
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (profile) {
+                if (profile.full_name) document.getElementById('user-email-display').innerText = profile.full_name;
+                if (profile.phone) document.getElementById('user-phone-display').innerText = profile.phone;
+                if (profile.avatar_url) document.getElementById('sidebar-avatar').src = profile.avatar_url;
+            }
         } else {
             document.getElementById('user-email-display').innerText = 'غير مسجل دخول';
         }
     } catch (e) {
         console.log(e);
     }
-});
+}
 
-// --- وظائف التفاعل الفوري ---
+// --- وظائف القائمة الجانبية الفعالة ---
+
+// 1. تعديل الملف الشخصي
+async function openEditProfileModal() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        alert('يرجى تسجيل الدخول أولاً');
+        return;
+    }
+    const newName = prompt('أدخل الاسم الكامل الجديد:');
+    const newPhone = prompt('أدخل رقم الهاتف الجديد:');
+    
+    if (newName || newPhone) {
+        const updates = { id: user.id };
+        if (newName) updates.full_name = newName;
+        if (newPhone) updates.phone = newPhone;
+
+        const { error } = await supabase.from('profiles').upsert(updates);
+        if (error) {
+            alert('حدث خطأ أثناء التحديث: ' + error.message);
+        } else {
+            alert('تم تحديث الملف الشخصي بنجاح!');
+            checkUserProfile();
+        }
+    }
+}
+
+// 2. إعدادات الوضع الليلي
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    alert(isDark ? 'تم تفعيل الوضع الليلي' : 'تم إيقاف الوضع الليلي');
+}
+
+// 3. تسجيل الخروج
+async function logoutUser() {
+    if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+        await supabase.auth.signOut();
+        alert('تم تسجيل الخروج بنجاح');
+        location.reload();
+    }
+}
+
+// --- وظائف التفاعل الفوري والأقسام ---
 function switchSection(targetId, btn) {
     document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
     const target = document.getElementById(targetId);
