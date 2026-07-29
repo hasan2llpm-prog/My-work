@@ -2,7 +2,6 @@
 const SUPABASE_URL = 'https://icpcthgueabxwwevowbt.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rg857jiJ2tgqje-odQHZIQ_2Sd0UzbD';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const ADMIN_EMAIL = 'jawadrissan22@gmail.com';
 
 document.addEventListener('DOMContentLoaded', async () => {
     loadLatestFiles();
@@ -17,12 +16,10 @@ async function checkUserProfile() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             document.getElementById('user-email-display').innerText = user.email;
-            // جلب البيانات الإضافية إن وجدت
-            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
             if (profile) {
                 if (profile.full_name) document.getElementById('user-email-display').innerText = profile.full_name;
                 if (profile.phone) document.getElementById('user-phone-display').innerText = profile.phone;
-                if (profile.avatar_url) document.getElementById('sidebar-avatar').src = profile.avatar_url;
             }
         } else {
             document.getElementById('user-email-display').innerText = 'غير مسجل دخول';
@@ -32,9 +29,7 @@ async function checkUserProfile() {
     }
 }
 
-// --- وظائف القائمة الجانبية الفعالة ---
-
-// 1. تعديل الملف الشخصي
+// --- 1. تعديل الملف الشخصي (مبسط ومباشر) ---
 async function openEditProfileModal() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -44,29 +39,31 @@ async function openEditProfileModal() {
     const newName = prompt('أدخل الاسم الكامل الجديد:');
     const newPhone = prompt('أدخل رقم الهاتف الجديد:');
     
-    if (newName || newPhone) {
-        const updates = { id: user.id };
-        if (newName) updates.full_name = newName;
-        if (newPhone) updates.phone = newPhone;
+    if (newName !== null || newPhone !== null) {
+        const updates = { 
+            id: user.id,
+            full_name: newName || '',
+            phone: newPhone || ''
+        };
 
         const { error } = await supabase.from('profiles').upsert(updates);
         if (error) {
-            alert('حدث خطأ أثناء التحديث: ' + error.message);
+            alert('خطأ في الحفظ: ' + error.message);
         } else {
-            alert('تم تحديث الملف الشخصي بنجاح!');
+            alert('تم تحديث البيانات بنجاح!');
             checkUserProfile();
         }
     }
 }
 
-// 2. إعدادات الوضع الليلي
+// --- 2. إعدادات الوضع الليلي ---
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     alert(isDark ? 'تم تفعيل الوضع الليلي' : 'تم إيقاف الوضع الليلي');
 }
 
-// 3. تسجيل الخروج
+// --- 3. تسجيل الخروج ---
 async function logoutUser() {
     if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
         await supabase.auth.signOut();
@@ -75,7 +72,7 @@ async function logoutUser() {
     }
 }
 
-// --- وظائف التفاعل الفوري والأقسام ---
+// --- التنقل بين الأقسام ---
 function switchSection(targetId, btn) {
     document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
     const target = document.getElementById(targetId);
@@ -87,9 +84,10 @@ function switchSection(targetId, btn) {
 
 async function openNotificationsModal() {
     const modal = document.getElementById('notifications-modal');
-    modal.style.display = 'flex';
+    if(modal) modal.style.display = 'flex';
     const { data: notifs } = await supabase.from('notifications').select('*').order('created_at', { ascending: false });
     const listContainer = document.getElementById('notifications-list');
+    if (!listContainer) return;
     
     if (!notifs || notifs.length === 0) {
         listContainer.innerHTML = '<p>لا توجد إشعارات جديدة</p>';
@@ -99,7 +97,8 @@ async function openNotificationsModal() {
 }
 
 async function openReferralModal() {
-    document.getElementById('referral-modal').style.display = 'flex';
+    const modal = document.getElementById('referral-modal');
+    if(modal) modal.style.display = 'flex';
     const { data: { user } } = await supabase.auth.getUser();
     const codeBox = document.getElementById('user-referral-code');
     if (user && codeBox) {
@@ -161,6 +160,7 @@ async function loadNotificationsCount() {
 
 function handleSearch(query) {
     const container = document.getElementById('search-results-container');
+    if (!container) return;
     if (!query) {
         container.innerHTML = '';
         return;
@@ -182,6 +182,7 @@ function handleSearch(query) {
 
 function loadSubStages(stageName) {
     const container = document.getElementById('sub-stages-container');
+    if (!container) return;
     container.innerHTML = `<p>جاري تحميل محتوى المرحلة (${stageName})...</p>`;
     supabase.from('sub_stages').select('*').eq('stage_name', stageName).then(({ data }) => {
         if (!data || data.length === 0) {
@@ -198,6 +199,7 @@ function loadSubStages(stageName) {
 
 async function loadUniversityStructure() {
     const container = document.getElementById('university-structure-container');
+    if (!container) return;
     container.innerHTML = '<p>جاري تحميل الكليات...</p>';
     const { data: colleges } = await supabase.from('colleges').select('*');
     if (!colleges || colleges.length === 0) {
