@@ -134,15 +134,19 @@
         </div>
     </div>
 
-    <!-- نافذة إضافة أستاذ (تظهر فقط ليوزرك A1) -->
+    <!-- نافذة إضافة أستاذ مع زر حفظ عائم وثابت بالأسفل -->
     <div class="custom-prompt-overlay" id="profModal" style="display: none;">
-        <div class="custom-prompt-box">
-            <h3 id="profModalTitle">إضافة أستاذ جديد للمادة</h3>
-            <input type="text" id="profNameInput" placeholder="اسم الأستاذ الكامل">
-            <textarea id="profInfoInput" placeholder="معلومات عن الأستاذ (نبذة، ساعات، تفاصيل...)" rows="3"></textarea>
-            <label style="font-size: 13px; font-weight: bold; color: #555; display: block; margin-top: 5px;">ملف الأستاذ (ملف / PDF / صورة):</label>
-            <input type="file" id="profFileInput" style="margin-top: 5px;">
-            <div class="custom-prompt-actions" style="margin-top: 15px;">
+        <div class="custom-prompt-box" style="display: flex; flex-direction: column; max-height: 85vh; position: relative;">
+            <h3 id="profModalTitle" style="flex-shrink: 0;">إضافة أستاذ جديد للمادة</h3>
+            
+            <div style="overflow-y: auto; flex-grow: 1; padding-left: 5px;">
+                <input type="text" id="profNameInput" placeholder="اسم الأستاذ الكامل">
+                <textarea id="profInfoInput" placeholder="معلومات عن الأستاذ (نبذة، ساعات، تفاصيل...)" rows="3"></textarea>
+                <label style="font-size: 13px; font-weight: bold; color: #555; display: block; margin-top: 5px;">ملف الأستاذ (ملف / PDF / صورة):</label>
+                <input type="file" id="profFileInput" style="margin-top: 5px; margin-bottom: 15px;">
+            </div>
+
+            <div class="custom-prompt-actions" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; flex-shrink: 0; background: #fff;">
                 <button onclick="closeProfModal()">إلغاء</button>
                 <button onclick="saveProfessorData()" style="background: #28a745; color: #fff;">حفظ ونشر</button>
             </div>
@@ -215,11 +219,9 @@
         </div>
     </div>
 
-    <!-- المراحل الدراسية والمواد المطلوبة (بدون أيقونات) -->
     <div class="stages-section">
         <h3>المراحل الدراسية</h3>
         
-        <!-- المرحلة الابتدائية -->
         <div class="stage-card" onclick="toggleStage('primary')">
             <span>المرحلة الابتدائية</span>
             <span>▼</span>
@@ -237,7 +239,6 @@
             </div>
         </div>
 
-        <!-- المرحلة المتوسطة -->
         <div class="stage-card" onclick="toggleStage('intermediate')">
             <span>المرحلة المتوسطة</span>
             <span>▼</span>
@@ -255,7 +256,6 @@
             </div>
         </div>
 
-        <!-- المرحلة الاعدادية -->
         <div class="stage-card" onclick="toggleStage('secondary')">
             <span>المرحلة الاعدادية</span>
             <span>▼</span>
@@ -273,7 +273,6 @@
             </div>
         </div>
 
-        <!-- الجامعة -->
         <div class="stage-card" onclick="toggleStage('university')">
             <span>الجامعة</span>
             <span>▼</span>
@@ -359,7 +358,7 @@
     </div>
 
     <div class="bottom-grid">
-        <div class="grid-box" onclick="openExams()">اختبارات</div>
+        <div class="grid-box">اختبارات</div>
         <div class="grid-box">فارغ 2</div>
         <div class="grid-box">فارغ 3</div>
         <div class="grid-box">فارغ 4</div>
@@ -370,43 +369,27 @@
         const SUPABASE_URL = 'https://icpcthgueabxwwevowbt.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_rg857jiJ2tgqje-odQHZIQ_2Sd0UzbD';
         
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: false },
-            global: { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-        });
+        let supabaseClient;
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: { persistSession: false },
+                global: { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+            });
+        } catch(e) {
+            console.error("Supabase init error:", e);
+        }
 
         let currentActiveStoryId = null;
         let currentActiveStoryOwner = null;
         let selectedAvatarBase64 = null;
-        
         let targetStageForProf = '';
         let targetSubjectForProf = '';
 
-        initApp();
-        loadStories();
-        loadProfessorsData();
-
-        supabaseClient.channel('public:stories')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'stories' }, payload => {
-                if (currentActiveStoryId && payload.new.id === currentActiveStoryId) {
-                    document.getElementById('viewsCount').innerText = payload.new.views || 0;
-                    let reactions = payload.new.reactions || {};
-                    document.getElementById('count-🙏').innerText = reactions['🙏'] || 0;
-                    document.getElementById('count-💔').innerText = reactions['💔'] || 0;
-                    document.getElementById('count-🫶').innerText = reactions['🫶'] || 0;
-                }
-            })
-            .subscribe();
-
-        function setupNotificationsListener(username) {
-            supabaseClient.channel('public:notifications:' + username)
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_username=eq.${username}` }, payload => {
-                    appendNotificationToUI(payload.new);
-                    updateBadgeCount(1);
-                    showMessage("🔔 وصلك إشعار جديد!");
-                })
-                .subscribe();
-        }
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            loadStories();
+            loadProfessorsData();
+        });
 
         function showCustomPrompt(title, defaultValue, callback) {
             const overlay = document.getElementById('customPromptOverlay');
@@ -428,8 +411,8 @@
                 btnCancel.removeEventListener('click', onCancel);
             };
 
-            btnConfirm.addEventListener('click', onConfirm);
-            btnCancel.addEventListener('click', onCancel);
+            btnConfirm.onclick = onConfirm;
+            btnCancel.onclick = onCancel;
         }
 
         async function initApp() {
@@ -443,7 +426,7 @@
 
         async function checkUserProfile() {
             let localKey = localStorage.getItem('perm_user_key');
-            const { data } = await supabaseClient.from('profiles').select('*').eq('id_key', localKey).single();
+            const { data, error } = await supabaseClient.from('profiles').select('*').eq('id_key', localKey).maybeSingle();
 
             if (data) {
                 document.getElementById('profile-name').innerText = data.full_name || 'غير محدد';
@@ -454,7 +437,6 @@
 
                 if (data.username) {
                     loadUserNotifications(data.username);
-                    setupNotificationsListener(data.username);
                     
                     let addProfBtns = document.querySelectorAll('.admin-add-prof');
                     let adminControlBtns = document.querySelectorAll('.admin-only-control');
@@ -543,7 +525,7 @@
                 showMessage("تم حفظ البيانات بنجاح ✅");
                 checkUserProfile();
             } else {
-                showMessage("خطأ الحفظ: " + (error.message || "تأكد من إعدادات الجدول"));
+                showMessage("خطأ الحفظ: تأكد من أن اسم اليوزر غير مستخدم مسبقاً");
             }
         }
 
@@ -650,7 +632,7 @@
             if (fileInput.files.length > 0) {
                 let file = fileInput.files[0];
                 let fileExt = file.name.split('.').pop();
-                let fileName = `${Date.now()}_${Math.random().toString(36.substring(2,7))}.${fileExt}`;
+                let fileName = `${Date.now()}_${Math.random().toString(36).substring(2,7)}.${fileExt}`;
                 
                 showMessage("جاري رفع الملف...");
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
@@ -757,7 +739,7 @@
             
             if (storiesData) {
                 for (let story of storiesData) {
-                    let { data: profileData } = await supabaseClient.from('profiles').select('avatar_url').eq('username', story.username).single();
+                    let { data: profileData } = await supabaseClient.from('profiles').select('avatar_url').eq('username', story.username).maybeSingle();
                     let avatarHtml = profileData && profileData.avatar_url ? `<img src="${profileData.avatar_url}" alt="story">` : `👤`;
                     container.innerHTML += `<div class="story-item" onclick='openStoryModal(${JSON.stringify(story)}, ${JSON.stringify(profileData ? profileData.avatar_url : "")})'><div class="story-circle">${avatarHtml}</div><span>${story.username}</span></div>`;
                 }
@@ -802,7 +784,7 @@
             if (!currentActiveStoryId) return;
             let currentUsername = document.getElementById('profile-username').innerText;
 
-            const { data } = await supabaseClient.from('stories').select('reactions').eq('id', currentActiveStoryId).single();
+            const { data } = await supabaseClient.from('stories').select('reactions').eq('id', currentActiveStoryId).maybeSingle();
             let reactions = (data && data.reactions) ? data.reactions : {};
             
             reactions[emoji] = (reactions[emoji] || 0) + 1;
@@ -885,14 +867,6 @@
             `;
         }
 
-        function updateBadgeCount(num) {
-            const badge = document.getElementById('notifBadge');
-            let current = parseInt(badge.innerText) || 0;
-            let total = current + num;
-            badge.innerText = total;
-            badge.style.display = total > 0 ? 'flex' : 'none';
-        }
-
         function openBroadcastModal() {
             document.getElementById('broadcastModal').style.display = 'flex';
         }
@@ -924,8 +898,6 @@
             document.body.appendChild(msg);
             setTimeout(() => { msg.remove(); }, 2500);
         }
-
-        function openExams() {}
     </script>
 </body>
 </html>
