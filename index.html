@@ -39,13 +39,18 @@
 
         /* نافذة عرض الستوري المطورة */
         .story-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column; color: #fff; }
-        .story-modal img { max-width: 90%; max-height: 65vh; border-radius: 8px; object-fit: contain; }
-        .story-info { margin-top: 15px; text-align: center; font-size: 14px; display: flex; gap: 20px; align-items: center; }
+        .story-modal img { max-width: 90%; max-height: 60vh; border-radius: 8px; object-fit: contain; }
+        .story-info { margin-top: 12px; text-align: center; font-size: 14px; display: flex; gap: 20px; align-items: center; cursor: pointer; }
         .story-actions-bar { margin-top: 15px; display: flex; gap: 15px; }
         .story-actions-bar button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; }
         .btn-edit { background: #ffc107; color: #000; }
         .btn-delete { background: #dc3545; color: #fff; }
         .story-modal .close-btn { position: absolute; top: 20px; left: 20px; background: #fff; border: none; font-size: 20px; padding: 5px 12px; border-radius: 50%; cursor: pointer; color: #000; }
+        
+        /* نافذة قائمة المشاهدين */
+        .viewers-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 50%; background: #fff; color: #333; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 3000; display: none; padding: 20px; overflow-y: auto; }
+        .viewers-modal h4 { margin-bottom: 10px; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .viewer-item { padding: 8px 0; border-bottom: 1px solid #f9f9f9; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -73,14 +78,23 @@
         <img id="modalImage" src="" alt="Story View">
         
         <div class="story-info">
-            <span>👁 25 مشاهدة</span>
-            <span style="cursor: pointer;" onclick="likeStory()">❤️ <span id="likeCount">10</span></span>
+            <span onclick="openViewersList()">👁 <span id="viewsCount">0</span> مشاهدة</span>
+            <span onclick="toggleLikeStory()">❤️ <span id="likesCount">0</span></span>
         </div>
 
         <div class="story-actions-bar" id="storyOwnerActions" style="display: none;">
             <button class="btn-edit" onclick="triggerEditStory()">✏️ تعديل</button>
-            <button class="btn-delete" onclick="deleteCurrentStory()">🗑 حذف</button>
+            <button class="btn-delete" onclick="confirmDeleteStory()">🗑 حذف</button>
         </div>
+    </div>
+
+    <!-- نافذة قائمة المشاهدين -->
+    <div class="viewers-modal" id="viewersModal">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4>قائمة المشاهدين والتفاعلات</h4>
+            <button onclick="closeViewersList()" style="background:none; border:none; font-size:18px; cursor:pointer;">✕</button>
+        </div>
+        <div id="viewersListContainer" style="margin-top: 10px;"></div>
     </div>
 
     <div class="stages-section">
@@ -217,8 +231,6 @@
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const image = e.target.result;
-
-                // حساب وقت انتهاء الستوري بعد 24 ساعة
                 const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
                 const { error } = await supabaseClient
@@ -238,7 +250,6 @@
                     loadStories();
                 }
             };
-
             reader.readAsDataURL(file);
         }
 
@@ -251,7 +262,6 @@
                 </div>
             `;
 
-            // جلب الستوريات النشطة فقط التي لم ينتهِ وقتها
             const nowIso = new Date().toISOString();
             const { data, error } = await supabaseClient
                 .from('stories')
@@ -273,7 +283,7 @@
             }
         }
 
-        function openStoryModal(story) {
+        async function openStoryModal(story) {
             currentActiveStoryId = story.id;
             document.getElementById('modalImage').src = story.media_url;
             document.getElementById('modalUsernameHeader').innerText = story.username;
@@ -282,22 +292,141 @@
             let currentUsername = localStorage.getItem('perm_username');
             let ownerActions = document.getElementById('storyOwnerActions');
 
-            // إظهار أزرار التعديل والحذف فقط إذا كان المستخدم هو صاحب الستوري
             if (story.username === currentUsername) {
                 ownerActions.style.display = 'flex';
             } else {
                 ownerActions.style.display = 'none';
             }
+
+            if (story.username !== currentUsername) {
+                await supabaseClient
+                    .from('story_views')
+                    .upsert([{ story_id: story.id, username: currentUsername }], { onConflict: 'story_id,username' });
+            }
+
+            await updateStoryStats(story.id);
+        }
+
+        async function updateStoryStats(storyId) {
+            const { count: viewsCount } = await supabaseClient
+                .from('story_views')
+                .select('*', { count: 'exact', head: true })
+                .eq('story_id', storyId);
+
+            const { count: likesCount } = await supabaseClient
+                .from('story_likes')
+                .select('*', { count: 'exact', head: true })
+                .eq('story_id', storyId);
+
+            document.getElementById('viewsCount').innerText = viewsCount || 0;
+            document.getElementById('likesCount').innerText = likesCount || 0;
+        }
+
+        async function toggleLikeStory() {
+            if (!currentActiveStoryId) return;
+            let currentUsername = localStorage.getItem('perm_username');
+
+            const { data: existingLike } = await supabaseClient
+                .from('story_likes')
+                .select('*')
+                .eq('story_id', currentActiveStoryId)
+                .eq('username', currentUsername)
+                .single();
+
+            if (existingLike) {
+                await supabaseClient
+                    .from('story_likes')
+                    .delete()
+                    .eq('story_id', currentActiveStoryId)
+                    .eq('username', currentUsername);
+                showMessage("تم إلغاء الإعجاب 🤍");
+            } else {
+                await supabaseClient
+                    .from('story_likes')
+                    .insert([{ story_id: currentActiveStoryId, username: currentUsername }]);
+                showMessage("تم الإعجاب ❤️");
+            }
+
+            await updateStoryStats(currentActiveStoryId);
+        }
+
+        async function openViewersList() {
+            if (!currentActiveStoryId) return;
+            let container = document.getElementById('viewersListContainer');
+            container.innerHTML = "جاري التحميل...";
+            document.getElementById('viewersModal').style.display = 'block';
+
+            const { data: views } = await supabaseClient
+                .from('story_views')
+                .select('username, created_at')
+                .eq('story_id', currentActiveStoryId);
+
+            const { data: likes } = await supabaseClient
+                .from('story_likes')
+                .select('username')
+                .eq('story_id', currentActiveStoryId);
+
+            let likedUsers = new Set(likes ? likes.map(l => l.username) : []);
+
+            if (views && views.length > 0) {
+                container.innerHTML = "";
+                views.forEach(v => {
+                    let hasLiked = likedUsers.has(v.username) ? " ❤️ تفاعل بإعجاب" : "";
+                    container.innerHTML += `<div class="viewer-item">👤 <strong>${v.username}</strong> ${hasLiked}</div>`;
+                });
+            } else {
+                container.innerHTML = "<p style='color:#777; font-size:14px;'>لا توجد مشاهدات حتى الآن.</p>";
+            }
+        }
+
+        function closeViewersList() {
+            document.getElementById('viewersModal').style.display = 'none';
         }
 
         function closeStoryModal() {
             document.getElementById('storyModal').style.display = 'none';
+            closeViewersList();
             currentActiveStoryId = null;
         }
 
-        async function deleteCurrentStory() {
+        function confirmDeleteStory() {
+            let overlayBox = document.createElement("div");
+            overlayBox.id = "customConfirmBox";
+            overlayBox.style.position = "fixed";
+            overlayBox.style.top = "0";
+            overlayBox.style.left = "0";
+            overlayBox.style.width = "100%";
+            overlayBox.style.height = "100%";
+            overlayBox.style.background = "rgba(0,0,0,0.6)";
+            overlayBox.style.zIndex = "4000";
+            overlayBox.style.display = "flex";
+            overlayBox.style.justifyContent = "center";
+            overlayBox.style.alignItems = "center";
+
+            overlayBox.innerHTML = `
+                <div style="background:#fff; padding:20px; border-radius:10px; width:80%; max-width:300px; text-align:center; color:#333;">
+                    <p style="margin-bottom:15px; font-size:15px; font-weight:bold;">هل أنت متأكد من حذف الستوري؟</p>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="yesDeleteBtn" style="background:#dc3545; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">نعم، حذف</button>
+                        <button id="noDeleteBtn" style="background:#6c757d; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">إلغاء</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlayBox);
+
+            document.getElementById('yesDeleteBtn').onclick = async function() {
+                overlayBox.remove();
+                await executeDeleteStory();
+            };
+
+            document.getElementById('noDeleteBtn').onclick = function() {
+                overlayBox.remove();
+            };
+        }
+
+        async function executeDeleteStory() {
             if (!currentActiveStoryId) return;
-            if (!confirm("هل أنت متأكد من حذف الستوري؟")) return;
 
             const { error } = await supabaseClient
                 .from('stories')
@@ -339,12 +468,6 @@
                 }
             };
             reader.readAsDataURL(file);
-        }
-
-        function likeStory() {
-            let likeElem = document.getElementById('likeCount');
-            likeElem.innerText = parseInt(likeElem.innerText) + 1;
-            showMessage("تم الإعجاب ❤️");
         }
 
         function showMessage(text) {
