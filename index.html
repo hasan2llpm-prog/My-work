@@ -308,8 +308,8 @@
                 img.src = event.target.result;
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 300;
-                    const MAX_HEIGHT = 300;
+                    const MAX_WIDTH = 150;
+                    const MAX_HEIGHT = 150;
                     let width = img.width;
                     let height = img.height;
 
@@ -329,7 +329,7 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                    callback(canvas.toDataURL('image/jpeg', 0.5));
                 }
             }
         }
@@ -370,8 +370,8 @@
                 showMessage("تم حفظ البيانات بنجاح ✅");
                 checkUserProfile();
             } else {
-                console.error(error);
-                showMessage("حدث خطأ أثناء الحفظ. تأكد من اتصال الإنترنت.");
+                console.error("Supabase Error:", error);
+                showMessage("خطأ الحفظ: " + (error.message || "تأكد من إعدادات الجدول"));
             }
         }
 
