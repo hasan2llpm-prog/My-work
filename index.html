@@ -53,7 +53,11 @@
         .mandatory-box h3 { margin-bottom: 10px; color: #007bff; font-size: 18px; }
         .mandatory-box p { font-size: 13px; margin-bottom: 15px; color: #666; }
         .mandatory-box input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; text-align: right; }
-        .mandatory-box button { background: #007bff; color: #fff; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 5px; }
+        
+        .mandatory-avatar-btn { background: #17a2b8; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; width: 100%; margin-bottom: 12px; }
+        
+        .modal-footer { display: flex; justify-content: flex-start; margin-top: 10px; }
+        .mandatory-save-btn { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
 
         .story-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: #fff; }
         .story-modal img { max-width: 90%; max-height: 60vh; border-radius: 8px; object-fit: contain; }
@@ -75,10 +79,16 @@
             <input type="text" id="init-username" placeholder="اسم اليوزر (Username)">
             <input type="tel" id="init-phone" placeholder="رقم الهاتف">
             <input type="email" id="init-email" placeholder="البريد الإلكتروني">
-            <button onclick="triggerMandatoryAvatarUpload()">اختر الصورة الشخصية & حفظ 📷</button>
+            
+            <button class="mandatory-avatar-btn" onclick="document.getElementById('mandatory-avatar-input').click()">📷 اختر الصورة الشخصية</button>
+            <div id="mandatory-avatar-status" style="font-size: 12px; color: #28a745; margin-bottom: 10px; display: none;">تم اختيار الصورة بنجاح ✓</div>
+
+            <div class="modal-footer">
+                <button class="mandatory-save-btn" onclick="saveMandatoryData()">حفظ البيانات</button>
+            </div>
         </div>
     </div>
-    <input type="file" id="mandatory-avatar-input" style="display: none;" accept="image/*" onchange="saveMandatoryProfile(this)">
+    <input type="file" id="mandatory-avatar-input" style="display: none;" accept="image/*" onchange="previewMandatoryAvatar(this)">
 
     <div class="top-bar">
         <button onclick="openNotifications()">🔔</button>
@@ -171,7 +181,7 @@
             <strong>الاسم الكامل:</strong>
             <span id="profile-name">جاري التحميل...</span>
             <div class="sidebar-actions">
-                <button class="btn-edit-field" onclick="editField('name')">تعديل (كل 7 أيام)</button>
+                <button class="btn-edit-field" onclick="editField('name')">تعديل</button>
                 <button class="btn-del-field" onclick="deleteField('name')">حذف</button>
             </div>
         </div>
@@ -180,7 +190,7 @@
             <strong>اسم اليوزر (Username):</strong>
             <span id="profile-username">جاري التحميل...</span>
             <div class="sidebar-actions">
-                <button class="btn-edit-field" onclick="editField('username')">تعديل (كل 7 أيام)</button>
+                <button class="btn-edit-field" onclick="editField('username')">تعديل</button>
                 <button class="btn-del-field" onclick="deleteField('username')">حذف</button>
             </div>
         </div>
@@ -233,6 +243,7 @@
         });
 
         let currentActiveStoryId = null;
+        let selectedAvatarBase64 = null;
 
         initApp();
         loadStories();
@@ -279,7 +290,51 @@
             }
         }
 
-        function triggerMandatoryAvatarUpload() {
+        function previewMandatoryAvatar(input) {
+            if (!input.files[0]) return;
+            compressImage(input.files[0], function(base64Image) {
+                selectedAvatarBase64 = base64Image;
+                let statusEl = document.getElementById('mandatory-avatar-status');
+                statusEl.style.display = 'block';
+                statusEl.innerText = 'تم اختيار الصورة بنجاح ✓';
+            });
+        }
+
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 300;
+                    const MAX_HEIGHT = 300;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                }
+            }
+        }
+
+        async function saveMandatoryData() {
             const name = document.getElementById('init-name').value.trim();
             const username = document.getElementById('init-username').value.trim();
             const phone = document.getElementById('init-phone').value.trim();
@@ -290,64 +345,45 @@
                 return;
             }
 
-            localStorage.setItem('temp_name', name);
-            localStorage.setItem('temp_username', username);
-            localStorage.setItem('temp_phone', phone);
-            localStorage.setItem('temp_email', email);
-
-            document.getElementById('mandatory-avatar-input').click();
-        }
-
-        async function saveMandatoryProfile(input) {
-            if (!input.files[0]) return;
-            const file = input.files[0];
             let localKey = localStorage.getItem('perm_user_key');
-
-            const name = localStorage.getItem('temp_name');
-            const username = localStorage.getItem('temp_username');
-            const phone = localStorage.getItem('temp_phone');
-            const email = localStorage.getItem('temp_email');
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Image = e.target.result;
-                const { error } = await supabaseClient
-                    .from('profiles')
-                    .update({
-                        full_name: name,
-                        username: username,
-                        phone: phone,
-                        email: email,
-                        avatar_url: base64Image,
-                        last_username_update: new Date().toISOString()
-                    })
-                    .eq('device_key', localKey);
-
-                if (!error) {
-                    displayAvatarInUI(base64Image);
-                    document.getElementById('mandatoryModal').style.display = 'none';
-                    showMessage("تم حفظ الملف الشخصي بنجاح ✅");
-                    checkUserProfile();
-                } else {
-                    showMessage("حدث خطأ أثناء الحفظ.");
-                }
+            let updateData = {
+                device_key: localKey,
+                full_name: name,
+                username: username,
+                phone: phone,
+                email: email
             };
-            reader.readAsDataURL(file);
+
+            if (selectedAvatarBase64) {
+                updateData.avatar_url = selectedAvatarBase64;
+            }
+
+            const { error } = await supabaseClient
+                .from('profiles')
+                .upsert(updateData, { onConflict: 'device_key' });
+
+            if (!error) {
+                if (selectedAvatarBase64) {
+                    displayAvatarInUI(selectedAvatarBase64);
+                }
+                document.getElementById('mandatoryModal').style.display = 'none';
+                showMessage("تم حفظ البيانات بنجاح ✅");
+                checkUserProfile();
+            } else {
+                console.error(error);
+                showMessage("حدث خطأ أثناء الحفظ. تأكد من اتصال الإنترنت.");
+            }
         }
 
         async function updateSidebarAvatar(input) {
             if (!input.files[0]) return;
-            const file = input.files[0];
             let localKey = localStorage.getItem('perm_user_key');
 
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Image = e.target.result;
+            compressImage(input.files[0], async function(base64Image) {
                 await supabaseClient.from('profiles').update({ avatar_url: base64Image }).eq('device_key', localKey);
                 displayAvatarInUI(base64Image);
                 showMessage("تم تحديث الصورة الشخصية 📷");
-            };
-            reader.readAsDataURL(file);
+            });
         }
 
         function displayAvatarInUI(url) {
@@ -356,30 +392,14 @@
 
         async function editField(field) {
             let localKey = localStorage.getItem('perm_user_key');
-            const { data } = await supabaseClient.from('profiles').select('*').eq('device_key', localKey).single();
-            
-            if ((field === 'username' || field === 'name') && data && data.last_username_update) {
-                let lastUpdate = new Date(data.last_username_update);
-                let now = new Date();
-                let diffDays = (now - lastUpdate) / (1000 * 60 * 60 * 24);
-
-                if (diffDays < 7) {
-                    let remainingDays = Math.ceil(7 - diffDays);
-                    showMessage(`عذراً، يمكنك تغيير ${field === 'username' ? 'اليوزر' : 'الاسم'} مرة كل 7 أيام فقط. باقي ${remainingDays} أيام.`);
-                    return;
-                }
-            }
-
             let fieldNamesAr = { 'name': 'الاسم الكامل', 'username': 'اسم اليوزر', 'phone': 'رقم الهاتف', 'email': 'البريد الإلكتروني' };
+            let dbFieldMap = { 'name': 'full_name', 'username': 'username', 'phone': 'phone', 'email': 'email' };
+            
             let newValue = prompt(`أدخل التعديل الجديد لـ ${fieldNamesAr[field]}:`);
             if (newValue === null || newValue.trim() === "") return;
 
             let updateObj = {};
-            updateObj[field] = newValue.trim();
-
-            if (field === 'username' || field === 'name') {
-                updateObj['last_username_update'] = new Date().toISOString();
-            }
+            updateObj[dbFieldMap[field]] = newValue.trim();
 
             const { error } = await supabaseClient.from('profiles').update(updateObj).eq('device_key', localKey);
             if (!error) {
@@ -392,10 +412,11 @@
 
         async function deleteField(field) {
             let localKey = localStorage.getItem('perm_user_key');
+            let dbFieldMap = { 'name': 'full_name', 'username': 'username', 'phone': 'phone', 'email': 'email' };
             if (!confirm("هل أنت متأكد من حذف هذا الحقل؟")) return;
 
             let updateObj = {};
-            updateObj[field] = null;
+            updateObj[dbFieldMap[field]] = null;
 
             const { error } = await supabaseClient.from('profiles').update(updateObj).eq('device_key', localKey);
             if (!error) {
@@ -431,18 +452,17 @@
         }
 
         function triggerUploadStory() { document.getElementById('story-file-input').click(); }
+        
         async function uploadStory(input) {
             if (!input.files[0]) return;
-            const file = input.files[0];
             let username = document.getElementById('profile-username').innerText;
-            let reader = new FileReader();
-            reader.onload = async function(e) {
+            
+            compressImage(input.files[0], async function(base64Image) {
                 let expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-                await supabaseClient.from('stories').insert([{ username: username, media_url: e.target.result, expires_at: expiresAt }]);
+                await supabaseClient.from('stories').insert([{ username: username, media_url: base64Image, expires_at: expiresAt }]);
                 showMessage("تم نشر الستوري ✅");
                 loadStories();
-            };
-            reader.readAsDataURL(file);
+            });
         }
 
         async function loadStories() {
@@ -480,10 +500,8 @@
         
         async function updateStoryImage(input) {
             if (!input.files[0] || !currentActiveStoryId) return;
-            const file = input.files[0];
-            let reader = new FileReader();
-            reader.onload = async function(e) {
-                let newImage = e.target.result;
+            
+            compressImage(input.files[0], async function(newImage) {
                 const { error } = await supabaseClient.from('stories').update({ media_url: newImage }).eq('id', currentActiveStoryId);
                 if (!error) {
                     showMessage("تم التعديل بنجاح ✏️");
@@ -492,8 +510,7 @@
                 } else {
                     showMessage("خطأ أثناء التعديل");
                 }
-            };
-            reader.readAsDataURL(file);
+            });
         }
 
         function confirmDeleteStory() {
