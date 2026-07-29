@@ -16,18 +16,21 @@
         .sidebar { position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); transition: 0.3s; z-index: 2000; padding: 20px; overflow-y: auto; }
         .sidebar.active { right: 0; }
         .sidebar h3 { margin-bottom: 15px; font-size: 18px; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        .sidebar-item { margin: 12px 0; font-size: 14px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
-        .sidebar-item strong { display: block; color: #555; font-size: 12px; margin-bottom: 3px; }
-        .sidebar-item span { color: #222; font-size: 14px; word-break: break-all; }
+        
+        .sidebar-item { margin: 15px 0; font-size: 14px; background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .sidebar-info { flex: 1; min-width: 150px; }
+        .sidebar-item strong { display: block; color: #6c757d; font-size: 11px; margin-bottom: 3px; }
+        .sidebar-item span { color: #212529; font-size: 14px; font-weight: bold; word-break: break-all; }
+        
         .sidebar-actions { display: flex; gap: 5px; margin-top: 5px; }
-        .sidebar-actions button { padding: 4px 8px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; }
+        .sidebar-actions button { padding: 6px 12px; font-size: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-edit-field { background: #ffc107; color: #000; }
         .btn-del-field { background: #dc3545; color: #fff; }
 
-        .profile-pic { width: 80px; height: 80px; border-radius: 50%; background: #ddd; margin: 0 auto 15px auto; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #777; overflow: hidden; cursor: pointer; border: 2px solid #007bff; position: relative; }
+        .profile-pic { width: 80px; height: 80px; border-radius: 50%; background: #ddd; margin: 0 auto 15px auto; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #777; overflow: hidden; cursor: pointer; border: 2px solid #007bff; }
         .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
 
-        .stories-container { display: flex; gap: 10px; padding: 10px; background: #fff; overflow-x: auto; border-bottom: 1px solid #ddd; position: relative; z-index: 50; }
+        .stories-container { display: flex; gap: 10px; padding: 10px; background: #fff; overflow-x: auto; border-bottom: 1px solid #ddd; }
         .story-item { min-width: 65px; text-align: center; cursor: pointer; }
         .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #007bff; display: flex; align-items: center; justify-content: center; background: #e9ecef; font-size: 24px; color: #007bff; overflow: hidden; }
         .story-circle img { width: 100%; height: 100%; object-fit: cover; }
@@ -38,30 +41,35 @@
         
         .stage-actions { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; padding: 12px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 10; gap: 10px; }
         .stage-actions.active { display: flex; }
-        .stage-actions button { flex: 1; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,123,255,0.3); transition: 0.2s; }
-        .stage-actions button:hover { background: #0056b3; }
+        .stage-actions button { flex: 1; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
 
         .bottom-grid { position: fixed; bottom: 0; left: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-top: 1px solid #ddd; text-align: center; z-index: 100; }
         .grid-box { padding: 12px 2px; font-size: 11px; border-right: 1px solid #eee; cursor: pointer; background: #fff; color: #555; }
-        .grid-box:hover { background: #f1f1f1; }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1500; pointer-events: none; }
-        .overlay.active { display: block; pointer-events: auto; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1500; }
+        .overlay.active { display: block; }
 
         .mandatory-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 5000; color: #fff; text-align: center; }
         .mandatory-box { background: #fff; color: #333; padding: 25px; border-radius: 12px; width: 85%; max-width: 320px; }
         .mandatory-box h3 { margin-bottom: 10px; color: #007bff; font-size: 18px; }
         .mandatory-box p { font-size: 13px; margin-bottom: 15px; color: #666; }
         .mandatory-box input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; text-align: right; }
-        
         .mandatory-avatar-btn { background: #17a2b8; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; width: 100%; margin-bottom: 12px; }
-        
-        .modal-footer { display: flex; justify-content: flex-start; margin-top: 10px; }
-        .mandatory-save-btn { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .mandatory-save-btn { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; }
+
+        /* تنسيق النافذة المخصصة الجديدة بدلاً من prompt الافتراضية */
+        .custom-prompt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 99999; }
+        .custom-prompt-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); direction: rtl; text-align: right; }
+        .custom-prompt-box h3 { margin-top: 0; font-size: 18px; color: #333; margin-bottom: 10px; }
+        .custom-prompt-box input { width: 100%; padding: 12px; margin: 10px 0 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; outline: none; }
+        .custom-prompt-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .custom-prompt-actions button { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        #customPromptCancel { background: #e0e0e0; color: #333; }
+        #customPromptConfirm { background: #1976D2; color: white; }
 
         .story-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: #fff; }
         .story-modal img { max-width: 90%; max-height: 60vh; border-radius: 8px; object-fit: contain; }
-        .story-info { margin-top: 12px; text-align: center; font-size: 14px; display: flex; gap: 20px; align-items: center; cursor: pointer; }
+        .story-info { margin-top: 12px; text-align: center; font-size: 14px; display: flex; gap: 20px; align-items: center; }
         .story-actions-bar { margin-top: 15px; display: flex; gap: 15px; }
         .story-actions-bar button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; }
         .btn-edit { background: #ffc107; color: #000; }
@@ -83,12 +91,22 @@
             <button class="mandatory-avatar-btn" onclick="document.getElementById('mandatory-avatar-input').click()">📷 اختر الصورة الشخصية</button>
             <div id="mandatory-avatar-status" style="font-size: 12px; color: #28a745; margin-bottom: 10px; display: none;">تم اختيار الصورة بنجاح ✓</div>
 
-            <div class="modal-footer">
-                <button class="mandatory-save-btn" onclick="saveMandatoryData()">حفظ البيانات</button>
-            </div>
+            <button class="mandatory-save-btn" onclick="saveMandatoryData()">حفظ البيانات</button>
         </div>
     </div>
     <input type="file" id="mandatory-avatar-input" style="display: none;" accept="image/*" onchange="previewMandatoryAvatar(this)">
+
+    <!-- عنصر النافذة المنبثقة المخصصة للتعديل -->
+    <div class="custom-prompt-overlay" id="customPromptOverlay">
+        <div class="custom-prompt-box">
+            <h3 id="customPromptTitle">تعديل البيانات</h3>
+            <input type="text" id="customPromptInput">
+            <div class="custom-prompt-actions">
+                <button id="customPromptCancel">إلغاء</button>
+                <button id="customPromptConfirm">موافق</button>
+            </div>
+        </div>
+    </div>
 
     <div class="top-bar">
         <button onclick="openNotifications()">🔔</button>
@@ -178,8 +196,10 @@
         </div>
 
         <div class="sidebar-item">
-            <strong>الاسم الكامل:</strong>
-            <span id="profile-name">جاري التحميل...</span>
+            <div class="sidebar-info">
+                <strong>الاسم الكامل:</strong>
+                <span id="profile-name">جاري التحميل...</span>
+            </div>
             <div class="sidebar-actions">
                 <button class="btn-edit-field" onclick="editField('name')">تعديل</button>
                 <button class="btn-del-field" onclick="deleteField('name')">حذف</button>
@@ -187,8 +207,10 @@
         </div>
 
         <div class="sidebar-item">
-            <strong>اسم اليوزر (Username):</strong>
-            <span id="profile-username">جاري التحميل...</span>
+            <div class="sidebar-info">
+                <strong>اسم اليوزر:</strong>
+                <span id="profile-username">جاري التحميل...</span>
+            </div>
             <div class="sidebar-actions">
                 <button class="btn-edit-field" onclick="editField('username')">تعديل</button>
                 <button class="btn-del-field" onclick="deleteField('username')">حذف</button>
@@ -196,8 +218,10 @@
         </div>
 
         <div class="sidebar-item">
-            <strong>رقم الهاتف:</strong>
-            <span id="profile-phone">غير محدد</span>
+            <div class="sidebar-info">
+                <strong>رقم الهاتف:</strong>
+                <span id="profile-phone">غير محدد</span>
+            </div>
             <div class="sidebar-actions">
                 <button class="btn-edit-field" onclick="editField('phone')">تعديل</button>
                 <button class="btn-del-field" onclick="deleteField('phone')">حذف</button>
@@ -205,23 +229,26 @@
         </div>
 
         <div class="sidebar-item">
-            <strong>البريد الإلكتروني:</strong>
-            <span id="profile-email">جاري التحميل...</span>
+            <div class="sidebar-info">
+                <strong>البريد الإلكتروني:</strong>
+                <span id="profile-email">جاري التحميل...</span>
+            </div>
             <div class="sidebar-actions">
                 <button class="btn-edit-field" onclick="editField('email')">تعديل</button>
                 <button class="btn-del-field" onclick="deleteField('email')">حذف</button>
             </div>
         </div>
 
-        <div class="sidebar-item">
-            <strong>رمز الإحالة (ثابت):</strong>
-            <span id="profile-referral" style="font-weight: bold; color: #007bff;">جاري التحميل...</span>
+        <div class="sidebar-item" style="background: #e7f3ff;">
+            <div class="sidebar-info">
+                <strong>رمز الإحالة (ثابت):</strong>
+                <span id="profile-referral" style="color: #007bff;">جاري التحميل...</span>
+            </div>
         </div>
 
         <hr style="margin: 15px 0;">
 
         <button onclick="shareApp()" style="width: 100%; padding: 10px; background: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">👥 دعوة صديق</button>
-        
         <a href="https://wa.me/message/TSDV5JBPE2KSP1" target="_blank" style="display: block; text-align: center; background: #007bff; color: #fff; padding: 10px; border-radius: 5px; text-decoration: none; font-weight: bold;">💬 تواصل معنا</a>
     </div>
 
@@ -247,6 +274,39 @@
 
         initApp();
         loadStories();
+
+        // دالة بديلة لـ prompt الافتراضية تظهر بشكل نظيف داخل التطبيق
+        function showCustomPrompt(title, defaultValue, callback) {
+            const overlay = document.getElementById('customPromptOverlay');
+            const titleEl = document.getElementById('customPromptTitle');
+            const inputEl = document.getElementById('customPromptInput');
+            const btnConfirm = document.getElementById('customPromptConfirm');
+            const btnCancel = document.getElementById('customPromptCancel');
+
+            titleEl.innerText = title;
+            inputEl.value = defaultValue || '';
+            overlay.style.display = 'flex';
+            inputEl.focus();
+
+            const onConfirm = () => {
+                cleanup();
+                callback(inputEl.value);
+            };
+
+            const onCancel = () => {
+                cleanup();
+                callback(null);
+            };
+
+            const cleanup = () => {
+                overlay.style.display = 'none';
+                btnConfirm.removeEventListener('click', onConfirm);
+                btnCancel.removeEventListener('click', onCancel);
+            };
+
+            btnConfirm.addEventListener('click', onConfirm);
+            btnCancel.addEventListener('click', onCancel);
+        }
 
         async function initApp() {
             let localKey = localStorage.getItem('perm_user_key');
@@ -370,7 +430,6 @@
                 showMessage("تم حفظ البيانات بنجاح ✅");
                 checkUserProfile();
             } else {
-                console.error("Supabase Error:", error);
                 showMessage("خطأ الحفظ: " + (error.message || "تأكد من إعدادات الجدول"));
             }
         }
@@ -395,19 +454,21 @@
             let fieldNamesAr = { 'name': 'الاسم الكامل', 'username': 'اسم اليوزر', 'phone': 'رقم الهاتف', 'email': 'البريد الإلكتروني' };
             let dbFieldMap = { 'name': 'full_name', 'username': 'username', 'phone': 'phone', 'email': 'email' };
             
-            let newValue = prompt(`أدخل التعديل الجديد لـ ${fieldNamesAr[field]}:`);
-            if (newValue === null || newValue.trim() === "") return;
+            // استبدال نافذة prompt بنظام الـ Modal المخصص النظيف
+            showCustomPrompt(`أدخل التعديل الجديد لـ ${fieldNamesAr[field]}:`, "", async function(newValue) {
+                if (newValue === null || newValue.trim() === "") return;
 
-            let updateObj = {};
-            updateObj[dbFieldMap[field]] = newValue.trim();
+                let updateObj = {};
+                updateObj[dbFieldMap[field]] = newValue.trim();
 
-            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('id_key', localKey);
-            if (!error) {
-                showMessage("تم التعديل بنجاح ✅");
-                checkUserProfile();
-            } else {
-                showMessage("حدث خطأ أثناء التعديل.");
-            }
+                const { error } = await supabaseClient.from('profiles').update(updateObj).eq('id_key', localKey);
+                if (!error) {
+                    showMessage("تم التعديل بنجاح ✅");
+                    checkUserProfile();
+                } else {
+                    showMessage("حدث خطأ أثناء التعديل.");
+                }
+            });
         }
 
         async function deleteField(field) {
@@ -433,7 +494,7 @@
             if (navigator.share) {
                 navigator.share({ title: 'تطبيق الطالب', text: shareText, url: window.location.href });
             } else {
-                prompt("انسخ رابط الإحالة:", shareText);
+                showCustomPrompt("انسخ رابط الإحالة:", shareText, function(){});
             }
         }
 
