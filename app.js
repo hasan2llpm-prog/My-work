@@ -13,13 +13,18 @@ const ADMIN_EMAIL = 'jawadrissan22@gmail.com';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initNavigation();
-    await checkUserSessionAndMandatorySignup();
     loadStages();
     loadStories();
     loadLatestFiles();
     loadNotificationsCount();
     initSearch();
     initModalEvents();
+    
+    try {
+        await checkUserSessionAndMandatorySignup();
+    } catch (e) {
+        console.log('Session check skipped');
+    }
 });
 
 // --- 2. التنقل بين الأقسام والشريط السفلي والقائمة الجانبية ---
