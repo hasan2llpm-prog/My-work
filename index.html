@@ -262,7 +262,7 @@
             const { data, error } = await supabaseClient
                 .from('profiles')
                 .select('*')
-                .eq('device_key', localKey)
+                .eq('id_key', localKey)
                 .single();
 
             if (data) {
@@ -284,7 +284,7 @@
             } else {
                 let refCode = Math.floor(Math.random() * 900000 + 100000).toString();
                 await supabaseClient.from('profiles').insert([
-                    { device_key: localKey, referral_code: refCode }
+                    { id_key: localKey, referral_code: refCode }
                 ]);
                 document.getElementById('mandatoryModal').style.display = 'flex';
             }
@@ -347,7 +347,7 @@
 
             let localKey = localStorage.getItem('perm_user_key');
             let updateData = {
-                device_key: localKey,
+                id_key: localKey,
                 full_name: name,
                 username: username,
                 phone: phone,
@@ -360,7 +360,7 @@
 
             const { error } = await supabaseClient
                 .from('profiles')
-                .upsert(updateData, { onConflict: 'device_key' });
+                .upsert(updateData, { onConflict: 'id_key' });
 
             if (!error) {
                 if (selectedAvatarBase64) {
@@ -380,7 +380,7 @@
             let localKey = localStorage.getItem('perm_user_key');
 
             compressImage(input.files[0], async function(base64Image) {
-                await supabaseClient.from('profiles').update({ avatar_url: base64Image }).eq('device_key', localKey);
+                await supabaseClient.from('profiles').update({ avatar_url: base64Image }).eq('id_key', localKey);
                 displayAvatarInUI(base64Image);
                 showMessage("تم تحديث الصورة الشخصية 📷");
             });
@@ -401,7 +401,7 @@
             let updateObj = {};
             updateObj[dbFieldMap[field]] = newValue.trim();
 
-            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('device_key', localKey);
+            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('id_key', localKey);
             if (!error) {
                 showMessage("تم التعديل بنجاح ✅");
                 checkUserProfile();
@@ -418,7 +418,7 @@
             let updateObj = {};
             updateObj[dbFieldMap[field]] = null;
 
-            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('device_key', localKey);
+            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('id_key', localKey);
             if (!error) {
                 showMessage("تم الحذف بنجاح 🗑");
                 checkUserProfile();
