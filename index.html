@@ -45,7 +45,6 @@
         .grid-box { padding: 12px 2px; font-size: 11px; border-right: 1px solid #eee; cursor: pointer; background: #fff; color: #555; }
         .grid-box:hover { background: #f1f1f1; }
 
-        /* إصلاح مشكلة تداخل الـ Overlay لعدم حجب اللمسات عندما تكون مغلقة */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1500; pointer-events: none; }
         .overlay.active { display: block; pointer-events: auto; }
 
@@ -330,7 +329,7 @@
                     showMessage("تم حفظ الملف الشخصي بنجاح ✅");
                     checkUserProfile();
                 } else {
-                    showMessage("خطأ: اسم اليوزر مستخدم مسبقاً.");
+                    showMessage("حدث خطأ أثناء الحفظ.");
                 }
             };
             reader.readAsDataURL(file);
@@ -387,7 +386,7 @@
                 showMessage("تم التعديل بنجاح ✅");
                 checkUserProfile();
             } else {
-                showMessage("حدث خطأ أثناء التعديل (قد يكون اليوزر مستخدم مسبقاً)");
+                showMessage("حدث خطأ أثناء التعديل.");
             }
         }
 
