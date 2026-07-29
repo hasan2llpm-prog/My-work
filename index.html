@@ -211,9 +211,9 @@
                     ]);
 
                 if (error) {
-                    alert("خطأ: " + error.message);
+                    showMessage("خطأ: " + error.message);
                 } else {
-                    alert("تم النشر");
+                    showMessage("تم النشر ✅");
                     loadStories();
                 }
             };
@@ -257,6 +257,27 @@
 
         function closeStoryModal() {
             document.getElementById('storyModal').style.display = 'none';
+        }
+
+        function showMessage(text) {
+            let msg = document.createElement("div");
+            msg.innerHTML = text;
+            msg.style.position = "fixed";
+            msg.style.bottom = "90px";
+            msg.style.left = "50%";
+            msg.style.transform = "translateX(-50%)";
+            msg.style.background = "#007bff";
+            msg.style.color = "white";
+            msg.style.padding = "12px 20px";
+            msg.style.borderRadius = "20px";
+            msg.style.zIndex = "9999";
+            msg.style.fontSize = "15px";
+
+            document.body.appendChild(msg);
+
+            setTimeout(() => {
+                msg.remove();
+            }, 2500);
         }
 
         function openNotifications() {}
