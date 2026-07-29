@@ -3,901 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق الطالب</title>
+    <title>منصة الطالب التعليمية</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding-bottom: 70px; }
-        
-        .top-bar { display: flex; justify-content: space-between; align-items: center; background: #007bff; color: #fff; padding: 15px; position: sticky; top: 0; z-index: 100; }
-        .top-bar h2 { font-size: 18px; }
-        .top-bar button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; position: relative; }
-
-        .notif-badge { position: absolute; top: -5px; right: -5px; background: #ff4757; color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; display: none; }
-
-        .sidebar { position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); transition: 0.3s; z-index: 2000; padding: 20px; overflow-y: auto; }
-        .sidebar.active { right: 0; }
-        .sidebar h3 { margin-bottom: 15px; font-size: 18px; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        
-        .sidebar-item { margin: 15px 0; font-size: 14px; background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .sidebar-info { flex: 1; min-width: 150px; }
-        .sidebar-item strong { display: block; color: #6c757d; font-size: 11px; margin-bottom: 3px; }
-        .sidebar-item span { color: #212529; font-size: 14px; font-weight: bold; word-break: break-all; }
-        
-        .sidebar-actions { display: flex; gap: 5px; margin-top: 5px; }
-        .sidebar-actions button { padding: 6px 12px; font-size: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-edit-field { background: #ffc107; color: #000; }
-        .btn-del-field { background: #dc3545; color: #fff; }
-
-        .profile-pic { width: 80px; height: 80px; border-radius: 50%; background: #ddd; margin: 0 auto 15px auto; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #777; overflow: hidden; cursor: pointer; border: 2px solid #007bff; }
-        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
-
-        .stories-container { display: flex; gap: 10px; padding: 10px; background: #fff; overflow-x: auto; border-bottom: 1px solid #ddd; }
-        .story-item { min-width: 65px; text-align: center; cursor: pointer; }
-        .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #007bff; display: flex; align-items: center; justify-content: center; background: #e9ecef; font-size: 24px; color: #007bff; overflow: hidden; }
-        .story-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .story-item span { font-size: 11px; display: block; margin-top: 5px; }
-
-        .stages-section { padding: 15px; }
-        .stages-section > h3 { margin-bottom: 15px; color: #333; font-size: 17px; }
-        .stage-card { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: bold; font-size: 15px; }
-        
-        .stage-content { display: none; background: #fff; padding: 15px; margin-top: -5px; margin-bottom: 10px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stage-content.active { display: block; }
-
-        .subject-box { background: #f8f9fa; border: 1px solid #e9ecef; padding: 12px; border-radius: 6px; margin-bottom: 12px; }
-        .subject-title { font-weight: bold; color: #007bff; margin-bottom: 8px; font-size: 14px; }
-        
-        .prof-card { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 13px; }
-        .prof-info-text { color: #555; margin: 5px 0; font-size: 12px; white-space: pre-wrap; }
-        .prof-actions-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
-        .prof-actions-row a, .prof-actions-row button { padding: 5px 10px; font-size: 12px; border-radius: 4px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; }
-        .btn-download-file { background: #28a745; color: #fff; }
-        .admin-only-control { background: #dc3545; color: #fff; display: none; }
-        .admin-add-prof { background: #007bff; color: #fff; margin-top: 8px; width: 100%; padding: 8px; font-size: 13px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; display: none; }
-
-        .bottom-grid { position: fixed; bottom: 0; left: 0; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-top: 1px solid #ddd; text-align: center; z-index: 100; }
-        .grid-box { padding: 12px 2px; font-size: 11px; border-right: 1px solid #eee; cursor: pointer; background: #fff; color: #555; }
-
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1500; }
-        .overlay.active { display: block; }
-
-        .mandatory-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 5000; color: #fff; text-align: center; }
-        .mandatory-box { background: #fff; color: #333; padding: 25px; border-radius: 12px; width: 85%; max-width: 320px; }
-        .mandatory-box h3 { margin-bottom: 10px; color: #007bff; font-size: 18px; }
-        .mandatory-box p { font-size: 13px; margin-bottom: 15px; color: #666; }
-        .mandatory-box input { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; text-align: right; }
-        .mandatory-avatar-btn { background: #17a2b8; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; width: 100%; margin-bottom: 12px; }
-        .mandatory-save-btn { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; }
-
-        .custom-prompt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 99999; }
-        .custom-prompt-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); direction: rtl; text-align: right; }
-        .custom-prompt-box h3 { margin-top: 0; font-size: 18px; color: #333; margin-bottom: 10px; }
-        .custom-prompt-box input, .custom-prompt-box textarea { width: 100%; padding: 12px; margin: 10px 0 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; outline: none; }
-        .custom-prompt-actions { display: flex; justify-content: flex-end; gap: 10px; }
-        .custom-prompt-actions button { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
-        #customPromptCancel { background: #e0e0e0; color: #333; }
-        #customPromptConfirm { background: #1976D2; color: white; }
-
-        .notifications-modal { position: fixed; top: 0; right: -100%; width: 100%; max-width: 360px; height: 100%; background: #fff; box-shadow: -5px 0 15px rgba(0,0,0,0.2); transition: 0.3s; z-index: 3000; padding: 20px; overflow-y: auto; direction: rtl; }
-        .notifications-modal.active { right: 0; }
-        .notifications-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .notifications-list { display: flex; flex-direction: column; gap: 10px; }
-        .notif-card { background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #007bff; font-size: 13px; color: #333; }
-        .notif-card span { display: block; font-size: 10px; color: #888; margin-top: 5px; }
-
-        .story-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: #fff; }
-        .story-modal-header { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 3001; }
-        .story-user-info { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; }
-        .story-user-avatar { width: 35px; height: 35px; border-radius: 50%; background: #555; object-fit: cover; }
-        .story-modal img.main-story-img { max-width: 90%; max-height: 62vh; border-radius: 8px; object-fit: contain; }
-        .story-footer-bar { position: absolute; bottom: 20px; width: 90%; max-width: 400px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .story-views-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 20px; font-size: 13px; backdrop-filter: blur(5px); }
-        .story-reactions-group { display: flex; gap: 8px; }
-        .reaction-btn { background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; backdrop-filter: blur(5px); transition: transform 0.1s; position: relative; }
-        .reaction-btn:active { transform: scale(1.2); }
-        .reaction-count { position: absolute; top: -5px; right: -5px; background: #ff4757; color: #fff; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: bold; }
-        .story-owner-bar { position: absolute; top: 70px; display: flex; gap: 10px; }
-        .story-owner-bar button { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-edit { background: #ffc107; color: #000; }
-        .btn-delete { background: #dc3545; color: #fff; }
-        .story-modal .close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: #fff; }
-    </style>
 </head>
 <body>
 
-    <div class="mandatory-modal" id="mandatoryModal">
-        <div class="mandatory-box">
-            <h3>أهلاً بك في التطبيق</h3>
-            <p>يرجى إدخال بياناتك الأساسية واختيار صورة شخصية للمتابعة.</p>
-            <input type="text" id="init-name" placeholder="الاسم الكامل">
-            <input type="text" id="init-username" placeholder="اسم اليوزر (Username)">
-            <input type="tel" id="init-phone" placeholder="رقم الهاتف">
-            <input type="email" id="init-email" placeholder="البريد الإلكتروني">
-            
-            <button class="mandatory-avatar-btn" onclick="document.getElementById('mandatory-avatar-input').click()">📷 اختر الصورة الشخصية</button>
-            <div id="mandatory-avatar-status" style="font-size: 12px; color: #28a745; margin-bottom: 10px; display: none;">تم اختيار الصورة بنجاح ✓</div>
+    <!-- الشريط العلوي -->
+    <header class="top-bar">
+        <div class="menu-icon" id="open-sidebar-btn">☰</div>
+        <div class="logo-title">منصة الطالب</div>
+        <div class="notifications-icon" id="open-notifications-btn">🔔<span id="notif-badge">0</span></div>
+    </header>
 
-            <button class="mandatory-save-btn" onclick="saveMandatoryData()">حفظ البيانات</button>
+    <!-- الشريط السفلي للتنقل -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-target="home-section">الرئيسية</button>
+        <button class="nav-item" data-target="stages-section">المراحل</button>
+        <button class="nav-item" data-target="search-section">بحث</button>
+        <button class="nav-item" data-target="library-section">المكتبة</button>
+        <button class="nav-item" data-target="quizzes-section">الاختبارات</button>
+        <button class="nav-item" data-target="favorites-section">المفضلة</button>
+    </nav>
+
+    <!-- القائمة الجانبية (الملف الشخصي والحساب) -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>حساب المستخدم</h3>
+            <button id="close-sidebar-btn">✕</button>
         </div>
-    </div>
-    <input type="file" id="mandatory-avatar-input" style="display: none;" accept="image/*" onchange="previewMandatoryAvatar(this)">
-
-    <div class="custom-prompt-overlay" id="customPromptOverlay">
-        <div class="custom-prompt-box">
-            <h3 id="customPromptTitle">تعديل البيانات</h3>
-            <input type="text" id="customPromptInput">
-            <div class="custom-prompt-actions">
-                <button id="customPromptCancel">إلغاء</button>
-                <button id="customPromptConfirm">موافق</button>
+        <div class="sidebar-body">
+            <!-- صورة الملف الشخصي داخل القائمة الجانبية -->
+            <div class="sidebar-profile-info">
+                <img id="sidebar-avatar" src="images/default-avatar.png" alt="صورة الملف الشخصي" class="avatar-img">
+                <p id="user-email-display">جاري التحميل...</p>
+                <p id="user-phone-display"></p>
+            </div>
+            <div class="sidebar-links">
+                <button id="profile-edit-btn">تعديل الملف الشخصي</button>
+                <button id="referral-btn">رمز الإحالة ودعوة صديق</button>
+                <button id="whatsapp-support-btn">التواصل عبر واتساب</button>
+                <button id="settings-btn">الإعدادات والوضع الليلي</button>
+                <button id="logout-btn">تسجيل الخروج</button>
             </div>
         </div>
     </div>
 
-    <!-- نافذة إضافة أستاذ مع زر حفظ عائم وثابت بالأسفل -->
-    <div class="custom-prompt-overlay" id="profModal" style="display: none;">
-        <div class="custom-prompt-box" style="display: flex; flex-direction: column; max-height: 85vh; position: relative;">
-            <h3 id="profModalTitle" style="flex-shrink: 0;">إضافة أستاذ جديد للمادة</h3>
-            
-            <div style="overflow-y: auto; flex-grow: 1; padding-left: 5px;">
-                <input type="text" id="profNameInput" placeholder="اسم الأستاذ الكامل">
-                <textarea id="profInfoInput" placeholder="معلومات عن الأستاذ (نبذة، ساعات، تفاصيل...)" rows="3"></textarea>
-                <label style="font-size: 13px; font-weight: bold; color: #555; display: block; margin-top: 5px;">ملف الأستاذ (ملف / PDF / صورة):</label>
-                <input type="file" id="profFileInput" style="margin-top: 5px; margin-bottom: 15px;">
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+
+        <!-- قسم الرئيسية (الستوري + أحدث الملفات + المواد الأكثر تحميلًا) -->
+        <section id="home-section" class="app-section active">
+            <!-- شريط الستوري -->
+            <div class="stories-container" id="stories-wrapper">
+                <div class="add-story-btn" id="add-story-trigger">➕ إضافة ستوري</div>
             </div>
 
-            <div class="custom-prompt-actions" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; flex-shrink: 0; background: #fff;">
-                <button onclick="closeProfModal()">إلغاء</button>
-                <button onclick="saveProfessorData()" style="background: #28a745; color: #fff;">حفظ ونشر</button>
+            <!-- أزرار تحكم الأدمن A1 -->
+            <div id="admin-controls-panel" class="admin-panel" style="display: none;">
+                <h3>لوحة تحكم الأدمن (A1)</h3>
+                <button id="admin-add-material">إضافة مادة / ملف (PDF, Word, PPT)</button>
+                <button id="admin-add-teacher">إضافة / تعديل / حذف أستاذ</button>
+                <button id="admin-manage-stages">إدارة المراحل والصفوف والجامعات</button>
+                <button id="admin-send-notification">إرسال إشعار عام / خاص</button>
             </div>
+
+            <div class="content-block">
+                <h2>أحدث الملفات</h2>
+                <div id="latest-files-container"></div>
+            </div>
+
+            <div class="content-block">
+                <h2>المواد الأكثر تحميلًا</h2>
+                <div id="popular-subjects-container"></div>
+            </div>
+        </section>
+
+        <!-- قسم المراحل الدراسية والجامعة -->
+        <section id="stages-section" class="app-section">
+            <h2>المراحل الدراسية</h2>
+            <div class="stages-grid">
+                <div class="stage-card" data-stage="primary">الابتدائي (الأول - السادس)</div>
+                <div class="stage-card" data-stage="middle">المتوسط (الأول - الثالث)</div>
+                <div class="stage-card" data-stage="prep">الإعدادي (الرابع - السادس)</div>
+                <div class="stage-card" data-stage="university">الجامعة (جامعة، كلية، قسم، مرحلة)</div>
+            </div>
+            
+            <!-- حاويات الهيكل الأكاديمي والصفوف والمواد -->
+            <div id="university-structure-container"></div>
+            <div id="sub-stages-container"></div>
+            <div id="subjects-grid-container"></div>
+        </section>
+
+        <!-- قسم البحث -->
+        <section id="search-section" class="app-section">
+            <h2>بحث متقدم</h2>
+            <input type="text" id="search-input" placeholder="ابحث عن مادة، مدرس، جامعة، كلية، أو قسم...">
+            <div id="search-results-container"></div>
+        </section>
+
+        <!-- قسم المكتبة -->
+        <section id="library-section" class="app-section">
+            <h2>المكتبة الشاملة</h2>
+            <div class="library-filters">
+                <button class="lib-filter" data-type="books">كتب</button>
+                <button class="lib-filter" data-type="notes">ملازم</button>
+                <button class="lib-filter" data-type="exams">أسئلة وزارية</button>
+                <button class="lib-filter" data-type="models">نماذج</button>
+            </div>
+            <div id="library-content-container"></div>
+        </section>
+
+        <!-- قسم الاختبارات -->
+        <section id="quizzes-section" class="app-section">
+            <h2>الاختبارات والامتحانات</h2>
+            <div id="quizzes-list-container"></div>
+        </section>
+
+        <!-- قسم المفضلة -->
+        <section id="favorites-section" class="app-section">
+            <h2>المفضلة والمحظوظات</h2>
+            <div class="fav-tabs">
+                <button class="fav-tab" data-target="fav-subjects">المواد المحفوظة</button>
+                <button class="fav-tab" data-target="fav-teachers">المدرسين المتابعين</button>
+                <button class="fav-tab" data-target="fav-files">الملفات المحفوظة</button>
+            </div>
+            <div id="favorites-container"></div>
+        </section>
+
+    </main>
+
+    <!-- النوافذ المنبثقة (Modals) الشاملة -->
+
+    <!-- 1. نافذة التسجيل الإجباري الأولي -->
+    <div id="mandatory-signup-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>استكمال بيانات الحساب الإجبارية</h3>
+            <input type="text" id="reg-fullname" placeholder="الاسم الكامل" required>
+            <input type="text" id="reg-username" placeholder="اسم المستخدم (اليوزر)" required>
+            <input type="tel" id="reg-phone" placeholder="رقم الهاتف" required>
+            <input type="email" id="reg-email" placeholder="البريد الإلكتروني" required>
+            <input type="file" id="reg-avatar" accept="image/*">
+            <button id="submit-mandatory-signup-btn">حفظ ومتابعة</button>
         </div>
     </div>
 
-    <div class="custom-prompt-overlay" id="broadcastModal" style="display: none;">
-        <div class="custom-prompt-box">
-            <h3>📢 إرسال إشعار للجميع</h3>
-            <textarea id="broadcastMsgInput" placeholder="اكتب نص الإشعار هنا..." rows="4"></textarea>
-            <div class="custom-prompt-actions">
-                <button onclick="document.getElementById('broadcastModal').style.display='none'">إلغاء</button>
-                <button onclick="sendBroadcastNotification()" style="background: #28a745; color: #fff;">إرسال الآن</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="notifications-modal" id="notificationsModal">
-        <div class="notifications-header">
-            <h3>الإشعارات الواردة</h3>
-            <button onclick="toggleNotificationsModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">✕</button>
-        </div>
-        <button onclick="openBroadcastModal()" id="broadcastBtn" style="width:100%; padding:10px; background:#007bff; color:#fff; border:none; border-radius:6px; font-weight:bold; margin-bottom:15px; display:none;">📢 إرسال إشعار للجميع</button>
-        <div class="notifications-list" id="notificationsList">
-            <p style="text-align:center; color: #888; font-size:13px;">لا توجد إشعارات حالياً.</p>
-        </div>
-    </div>
-
-    <div class="top-bar">
-        <button onclick="toggleNotificationsModal()">🔔 <span class="notif-badge" id="notifBadge">0</span></button>
-        <h2>تطبيق الطالب</h2>
-        <button onclick="toggleSidebar()">☰</button>
-    </div>
-
-    <div class="stories-container" id="stories-container">
-        <div class="story-item" onclick="triggerUploadStory()">
-            <div class="story-circle">+</div>
-            <span>قصتي</span>
-        </div>
-    </div>
-    <input type="file" id="story-file-input" style="display: none;" accept="image/*" onchange="uploadStory(this)">
-    <input type="file" id="story-edit-input" style="display: none;" accept="image/*" onchange="updateStoryImage(this)">
-    <input type="file" id="sidebar-avatar-input" style="display: none;" accept="image/*" onchange="updateSidebarAvatar(this)">
-
-    <div class="story-modal" id="storyModal">
-        <div class="story-modal-header">
-            <div class="story-user-info">
-                <img id="modalUserAvatar" src="" class="story-user-avatar" alt="">
-                <span id="modalUsernameHeader"></span>
-            </div>
-            <button class="close-btn" onclick="closeStoryModal()">✕</button>
-        </div>
-
-        <div class="story-owner-bar" id="storyOwnerActions" style="display: none;">
-            <button class="btn-edit" onclick="triggerEditStory()">✏️ تعديل</button>
-            <button class="btn-delete" onclick="confirmDeleteStory()">🗑 حذف</button>
-        </div>
-
-        <img id="modalImage" class="main-story-img" src="" alt="Story View">
-
-        <div class="story-footer-bar">
-            <div class="story-views-pill">
-                <span>👁</span> <span id="viewsCount">0</span>
-            </div>
-            <div class="story-reactions-group">
-                <button class="reaction-btn" onclick="reactStory('🙏')" title="دعاء">🙏<span class="reaction-count" id="count-🙏">0</span></button>
-                <button class="reaction-btn" onclick="reactStory('💔')" title="كسر قلب">💔<span class="reaction-count" id="count-💔">0</span></button>
-                <button class="reaction-btn" onclick="reactStory('🫶')" title="حب">🫶<span class="reaction-count" id="count-🫶">0</span></button>
-            </div>
-        </div>
-    </div>
-
-    <div class="stages-section">
-        <h3>المراحل الدراسية</h3>
-        
-        <div class="stage-card" onclick="toggleStage('primary')">
-            <span>المرحلة الابتدائية</span>
-            <span>▼</span>
-        </div>
-        <div id="stage-primary-content" class="stage-content">
-            <div class="subject-box">
-                <div class="subject-title">اللغة العربية</div>
-                <div class="prof-list-container" data-subject="اللغة العربية - المرحلة الابتدائية"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الابتدائية', 'اللغة العربية')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-            <div class="subject-box">
-                <div class="subject-title">الرياضيات</div>
-                <div class="prof-list-container" data-subject="الرياضيات - المرحلة الابتدائية"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الابتدائية', 'الرياضيات')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-        </div>
-
-        <div class="stage-card" onclick="toggleStage('intermediate')">
-            <span>المرحلة المتوسطة</span>
-            <span>▼</span>
-        </div>
-        <div id="stage-intermediate-content" class="stage-content">
-            <div class="subject-box">
-                <div class="subject-title">اللغة الإنجليزية</div>
-                <div class="prof-list-container" data-subject="اللغة الإنجليزية - المرحلة المتوسطة"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة المتوسطة', 'اللغة الإنجليزية')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-            <div class="subject-box">
-                <div class="subject-title">العلوم العامة</div>
-                <div class="prof-list-container" data-subject="العلوم العامة - المرحلة المتوسطة"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة المتوسطة', 'العلوم العامة')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-        </div>
-
-        <div class="stage-card" onclick="toggleStage('secondary')">
-            <span>المرحلة الاعدادية</span>
-            <span>▼</span>
-        </div>
-        <div id="stage-secondary-content" class="stage-content">
-            <div class="subject-box">
-                <div class="subject-title">الفيزياء</div>
-                <div class="prof-list-container" data-subject="الفيزياء - المرحلة الاعدادية"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الاعدادية', 'الفيزياء')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-            <div class="subject-box">
-                <div class="subject-title">الكيمياء</div>
-                <div class="prof-list-container" data-subject="الكيمياء - المرحلة الاعدادية"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('المرحلة الاعدادية', 'الكيمياء')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-        </div>
-
-        <div class="stage-card" onclick="toggleStage('university')">
-            <span>الجامعة</span>
-            <span>▼</span>
-        </div>
-        <div id="stage-university-content" class="stage-content">
-            <div class="subject-box">
-                <div class="subject-title">البرمجة المتقدمة</div>
-                <div class="prof-list-container" data-subject="البرمجة المتقدمة - الجامعة"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('الجامعة', 'البرمجة المتقدمة')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-            <div class="subject-box">
-                <div class="subject-title">قواعد البيانات</div>
-                <div class="prof-list-container" data-subject="قواعد البيانات - الجامعة"></div>
-                <button class="admin-add-prof" onclick="openAddProfModal('الجامعة', 'قواعد البيانات')">+ إضافة أستاذ ومعلومات وملف</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-    
-    <div class="sidebar" id="sidebar">
-        <h3>الملف الشخصي</h3>
-        
-        <div class="profile-pic" id="sidebar-pic-container" onclick="document.getElementById('sidebar-avatar-input').click()" title="انقر لتغيير الصورة الشخصية">
-            👤
-        </div>
-
-        <div class="sidebar-item">
-            <div class="sidebar-info">
-                <strong>الاسم الكامل:</strong>
-                <span id="profile-name">جاري التحميل...</span>
-            </div>
-            <div class="sidebar-actions">
-                <button class="btn-edit-field" onclick="editField('name')">تعديل</button>
-                <button class="btn-del-field" onclick="deleteField('name')">حذف</button>
-            </div>
-        </div>
-
-        <div class="sidebar-item">
-            <div class="sidebar-info">
-                <strong>اسم اليوزر:</strong>
-                <span id="profile-username">جاري التحميل...</span>
-            </div>
-            <div class="sidebar-actions">
-                <button class="btn-edit-field" onclick="editField('username')">تعديل</button>
-                <button class="btn-del-field" onclick="deleteField('username')">حذف</button>
-            </div>
-        </div>
-
-        <div class="sidebar-item">
-            <div class="sidebar-info">
-                <strong>رقم الهاتف:</strong>
-                <span id="profile-phone">غير محدد</span>
-            </div>
-            <div class="sidebar-actions">
-                <button class="btn-edit-field" onclick="editField('phone')">تعديل</button>
-                <button class="btn-del-field" onclick="deleteField('phone')">حذف</button>
-            </div>
-        </div>
-
-        <div class="sidebar-item">
-            <div class="sidebar-info">
-                <strong>البريد الإلكتروني:</strong>
-                <span id="profile-email">جاري التحميل...</span>
-            </div>
-            <div class="sidebar-actions">
-                <button class="btn-edit-field" onclick="editField('email')">تعديل</button>
-                <button class="btn-del-field" onclick="deleteField('email')">حذف</button>
-            </div>
-        </div>
-
-        <div class="sidebar-item" style="background: #e7f3ff;">
-            <div class="sidebar-info">
-                <strong>رمز الإحالة (ثابت):</strong>
-                <span id="profile-referral" style="color: #007bff;">جاري التحميل...</span>
-            </div>
-        </div>
-
-        <hr style="margin: 15px 0;">
-
-        <button onclick="shareApp()" style="width: 100%; padding: 10px; background: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">👥 دعوة صديق</button>
-        <a href="https://wa.me/message/TSDV5JBPE2KSP1" target="_blank" style="display: block; text-align: center; background: #007bff; color: #fff; padding: 10px; border-radius: 5px; text-decoration: none; font-weight: bold;">💬 تواصل معنا</a>
-    </div>
-
-    <div class="bottom-grid">
-        <div class="grid-box">اختبارات</div>
-        <div class="grid-box">فارغ 2</div>
-        <div class="grid-box">فارغ 3</div>
-        <div class="grid-box">فارغ 4</div>
-        <div class="grid-box">فارغ 5</div>
-    </div>
-
-    <script>
-        const SUPABASE_URL = 'https://icpcthgueabxwwevowbt.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_rg857jiJ2tgqje-odQHZIQ_2Sd0UzbD';
-        
-        let supabaseClient;
-        try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                auth: { persistSession: false },
-                global: { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-            });
-        } catch(e) {
-            console.error("Supabase init error:", e);
-        }
-
-        let currentActiveStoryId = null;
-        let currentActiveStoryOwner = null;
-        let selectedAvatarBase64 = null;
-        let targetStageForProf = '';
-        let targetSubjectForProf = '';
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initApp();
-            loadStories();
-            loadProfessorsData();
-        });
-
-        function showCustomPrompt(title, defaultValue, callback) {
-            const overlay = document.getElementById('customPromptOverlay');
-            const titleEl = document.getElementById('customPromptTitle');
-            const inputEl = document.getElementById('customPromptInput');
-            const btnConfirm = document.getElementById('customPromptConfirm');
-            const btnCancel = document.getElementById('customPromptCancel');
-
-            titleEl.innerText = title;
-            inputEl.value = defaultValue || '';
-            overlay.style.display = 'flex';
-            inputEl.focus();
-
-            const onConfirm = () => { cleanup(); callback(inputEl.value); };
-            const onCancel = () => { cleanup(); callback(null); };
-            const cleanup = () => {
-                overlay.style.display = 'none';
-                btnConfirm.removeEventListener('click', onConfirm);
-                btnCancel.removeEventListener('click', onCancel);
-            };
-
-            btnConfirm.onclick = onConfirm;
-            btnCancel.onclick = onCancel;
-        }
-
-        async function initApp() {
-            let localKey = localStorage.getItem('perm_user_key');
-            if (!localKey) {
-                localKey = 'user_' + Math.random().toString(36).substring(2, 9);
-                localStorage.setItem('perm_user_key', localKey);
-            }
-            checkUserProfile();
-        }
-
-        async function checkUserProfile() {
-            let localKey = localStorage.getItem('perm_user_key');
-            const { data, error } = await supabaseClient.from('profiles').select('*').eq('id_key', localKey).maybeSingle();
-
-            if (data) {
-                document.getElementById('profile-name').innerText = data.full_name || 'غير محدد';
-                document.getElementById('profile-username').innerText = data.username || 'غير محدد';
-                document.getElementById('profile-phone').innerText = data.phone || 'غير محدد';
-                document.getElementById('profile-email').innerText = data.email || 'غير محدد';
-                document.getElementById('profile-referral').innerText = data.referral_code || '---';
-
-                if (data.username) {
-                    loadUserNotifications(data.username);
-                    
-                    let addProfBtns = document.querySelectorAll('.admin-add-prof');
-                    let adminControlBtns = document.querySelectorAll('.admin-only-control');
-                    
-                    if (data.username === 'A1') { 
-                        document.getElementById('broadcastBtn').style.display = 'block';
-                        addProfBtns.forEach(btn => btn.style.display = 'block');
-                        adminControlBtns.forEach(btn => btn.style.display = 'inline-block');
-                    } else {
-                        document.getElementById('broadcastBtn').style.display = 'none';
-                        addProfBtns.forEach(btn => btn.style.display = 'none');
-                        adminControlBtns.forEach(btn => btn.style.display = 'none');
-                    }
-                }
-
-                if (data.avatar_url) { displayAvatarInUI(data.avatar_url); }
-
-                if (!data.username || !data.email || !data.full_name) {
-                    document.getElementById('mandatoryModal').style.display = 'flex';
-                } else {
-                    document.getElementById('mandatoryModal').style.display = 'none';
-                }
-            } else {
-                let refCode = Math.floor(Math.random() * 900000 + 100000).toString();
-                await supabaseClient.from('profiles').insert([{ id_key: localKey, referral_code: refCode }]);
-                document.getElementById('mandatoryModal').style.display = 'flex';
-            }
-        }
-
-        function previewMandatoryAvatar(input) {
-            if (!input.files[0]) return;
-            compressImage(input.files[0], 150, 150, 0.5, function(base64Image) {
-                selectedAvatarBase64 = base64Image;
-                let statusEl = document.getElementById('mandatory-avatar-status');
-                statusEl.style.display = 'block';
-                statusEl.innerText = 'تم اختيار الصورة بنجاح ✓';
-            });
-        }
-
-        function compressImage(file, maxWidth, maxHeight, quality, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                    } else {
-                        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', quality));
-                }
-            }
-        }
-
-        async function saveMandatoryData() {
-            const name = document.getElementById('init-name').value.trim();
-            const username = document.getElementById('init-username').value.trim();
-            const phone = document.getElementById('init-phone').value.trim();
-            const email = document.getElementById('init-email').value.trim();
-
-            if (!name || !username || !email) {
-                showMessage("يرجى ملء الحقول الأساسية (الاسم، اليوزر، البريد)");
-                return;
-            }
-
-            let localKey = localStorage.getItem('perm_user_key');
-            let updateData = { id_key: localKey, full_name: name, username: username, phone: phone, email: email };
-            if (selectedAvatarBase64) { updateData.avatar_url = selectedAvatarBase64; }
-
-            const { error } = await supabaseClient.from('profiles').upsert(updateData, { onConflict: 'id_key' });
-
-            if (!error) {
-                if (selectedAvatarBase64) { displayAvatarInUI(selectedAvatarBase64); }
-                document.getElementById('mandatoryModal').style.display = 'none';
-                showMessage("تم حفظ البيانات بنجاح ✅");
-                checkUserProfile();
-            } else {
-                showMessage("خطأ الحفظ: تأكد من أن اسم اليوزر غير مستخدم مسبقاً");
-            }
-        }
-
-        async function updateSidebarAvatar(input) {
-            if (!input.files[0]) return;
-            let localKey = localStorage.getItem('perm_user_key');
-            compressImage(input.files[0], 150, 150, 0.5, async function(base64Image) {
-                await supabaseClient.from('profiles').update({ avatar_url: base64Image }).eq('id_key', localKey);
-                displayAvatarInUI(base64Image);
-                showMessage("تم تحديث الصورة الشخصية 📷");
-            });
-        }
-
-        function displayAvatarInUI(url) {
-            document.getElementById('sidebar-pic-container').innerHTML = `<img src="${url}" alt="Profile">`;
-        }
-
-        async function editField(field) {
-            let localKey = localStorage.getItem('perm_user_key');
-            let fieldNamesAr = { 'name': 'الاسم الكامل', 'username': 'اسم اليوزر', 'phone': 'رقم الهاتف', 'email': 'البريد الإلكتروني' };
-            let dbFieldMap = { 'name': 'full_name', 'username': 'username', 'phone': 'phone', 'email': 'email' };
-            
-            showCustomPrompt(`أدخل التعديل الجديد لـ ${fieldNamesAr[field]}:`, "", async function(newValue) {
-                if (newValue === null || newValue.trim() === "") return;
-                let updateObj = {};
-                updateObj[dbFieldMap[field]] = newValue.trim();
-
-                const { error } = await supabaseClient.from('profiles').update(updateObj).eq('id_key', localKey);
-                if (!error) {
-                    showMessage("تم التعديل بنجاح ✅");
-                    checkUserProfile();
-                } else {
-                    showMessage("حدث خطأ أثناء التعديل.");
-                }
-            });
-        }
-
-        async function deleteField(field) {
-            let localKey = localStorage.getItem('perm_user_key');
-            let dbFieldMap = { 'name': 'full_name', 'username': 'username', 'phone': 'phone', 'email': 'email' };
-            if (!confirm("هل أنت متأكد من حذف هذا الحقل؟")) return;
-
-            let updateObj = {};
-            updateObj[dbFieldMap[field]] = null;
-            const { error } = await supabaseClient.from('profiles').update(updateObj).eq('id_key', localKey);
-            if (!error) {
-                showMessage("تم الحذف بنجاح 🗑");
-                checkUserProfile();
-            } else {
-                showMessage("خطأ أثناء الحذف");
-            }
-        }
-
-        function shareApp() {
-            let refCode = document.getElementById('profile-referral').innerText;
-            let shareText = `انضم إلي في تطبيق الطالب واستفد من الملفات الدراسية! استخدم رمز الإحالة الخاص بي: ${refCode}`;
-            if (navigator.share) {
-                navigator.share({ title: 'تطبيق الطالب', text: shareText, url: window.location.href });
-            } else {
-                showCustomPrompt("انسخ رابط الإحالة:", shareText, function(){});
-            }
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
-        }
-
-        function toggleNotificationsModal() {
-            const modal = document.getElementById('notificationsModal');
-            modal.style.right = modal.style.right === '0px' ? '-100%' : '0px';
-            document.getElementById('overlay').classList.toggle('active');
-        }
-
-        function toggleStage(stageKey) {
-            const content = document.getElementById(`stage-${stageKey}-content`);
-            content.classList.toggle('active');
-        }
-
-        function openAddProfModal(stageName, subjectName) {
-            targetStageForProf = stageName;
-            targetSubjectForProf = subjectName;
-            document.getElementById('profModalTitle').innerText = `إضافة أستاذ لـ: ${subjectName}`;
-            document.getElementById('profNameInput').value = '';
-            document.getElementById('profInfoInput').value = '';
-            document.getElementById('profFileInput').value = '';
-            document.getElementById('profModal').style.display = 'flex';
-        }
-
-        function closeProfModal() {
-            document.getElementById('profModal').style.display = 'none';
-        }
-
-        async function saveProfessorData() {
-            let profName = document.getElementById('profNameInput').value.trim();
-            let profInfo = document.getElementById('profInfoInput').value.trim();
-            let fileInput = document.getElementById('profFileInput');
-
-            if (!profName) {
-                showMessage("يرجى إدخال اسم الأستاذ على الأقل");
-                return;
-            }
-
-            if (fileInput.files.length > 0) {
-                let file = fileInput.files[0];
-                let fileExt = file.name.split('.').pop();
-                let fileName = `${Date.now()}_${Math.random().toString(36).substring(2,7)}.${fileExt}`;
-                
-                showMessage("جاري رفع الملف...");
-                const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                    .from('professors-files')
-                    .upload(fileName, file);
-
-                if (uploadError) {
-                    showMessage("خطأ في رفع الملف: " + uploadError.message);
-                    return;
-                }
-
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('professors-files')
-                    .getPublicUrl(fileName);
-
-                await insertProfToDb(profName, profInfo, publicUrlData.publicUrl, file.name);
-            } else {
-                await insertProfToDb(profName, profInfo, '', '');
-            }
-        }
-
-        async function insertProfToDb(name, info, fileUrl, fileName) {
-            const { error } = await supabaseClient.from('professors').insert([{
-                stage: targetStageForProf,
-                subject: targetSubjectForProf,
-                prof_name: name,
-                prof_info: info,
-                file_url: fileUrl,
-                file_name: fileName
-            }]);
-
-            if (!error) {
-                showMessage("تمت إضافة الأستاذ وملفه بنجاح ✅");
-                closeProfModal();
-                loadProfessorsData();
-            } else {
-                showMessage("خطأ أثناء الحفظ في قاعدة البيانات");
-            }
-        }
-
-        async function loadProfessorsData() {
-            const { data } = await supabaseClient.from('professors').select('*');
-            
-            document.querySelectorAll('.prof-list-container').forEach(el => el.innerHTML = '');
-
-            if (data && data.length > 0) {
-                let username = document.getElementById('profile-username').innerText;
-                let isAdmin = (username === 'A1');
-
-                data.forEach(item => {
-                    document.querySelectorAll('.prof-list-container').forEach(container => {
-                        let targetIdentifier = `${item.subject} - ${item.stage}`;
-                        if (container.getAttribute('data-subject') === targetIdentifier) {
-                            
-                            let fileDownloadHtml = item.file_url ? `<a href="${item.file_url}" target="_blank" download="${item.file_name || 'file'}" class="btn-download-file">📥 تحميل الملف (${item.file_name || 'ملف المادة'})</a>` : `<span style="color:#888; font-size:11px;">لا يوجد ملف مرفوع</span>`;
-                            let deleteBtnHtml = isAdmin ? `<button class="admin-only-control" style="display:inline-block;" onclick="deleteProfessor(${item.id})">حذف</button>` : '';
-
-                            container.innerHTML += `
-                                <div class="prof-card">
-                                    <div style="font-weight:bold; color:#333;">👨‍🏫 ${item.prof_name}</div>
-                                    <div class="prof-info-text">${item.prof_info || 'لا توجد معلومات إضافية.'}</div>
-                                    <div class="prof-actions-row">
-                                        ${fileDownloadHtml}
-                                        ${deleteBtnHtml}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
-                });
-            }
-        }
-
-        async function deleteProfessor(id) {
-            if (!confirm("هل أنت متأكد من حذف هذا الأستاذ ومعلوماته وملفه؟")) return;
-            const { error } = await supabaseClient.from('professors').delete().eq('id', id);
-            if (!error) {
-                showMessage("تم الحذف بنجاح 🗑");
-                loadProfessorsData();
-            } else {
-                showMessage("حدث خطأ أثناء الحذف");
-            }
-        }
-
-        function triggerUploadStory() { document.getElementById('story-file-input').click(); }
-        
-        async function uploadStory(input) {
-            if (!input.files[0]) return;
-            let username = document.getElementById('profile-username').innerText;
-            
-            compressImage(input.files[0], 1200, 1200, 0.9, async function(base64Image) {
-                let expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-                await supabaseClient.from('stories').insert([{ username: username, media_url: base64Image, expires_at: expiresAt, views: 0, reactions: {} }]);
-                showMessage("تم نشر الستوري بجودة عالية ✅");
-                loadStories();
-            });
-        }
-
-        async function loadStories() {
-            const container = document.getElementById('stories-container');
-            container.innerHTML = `<div class="story-item" onclick="triggerUploadStory()"><div class="story-circle">+</div><span>قصتي</span></div>`;
-            
-            const { data: storiesData } = await supabaseClient.from('stories').select('*').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false });
-            
-            if (storiesData) {
-                for (let story of storiesData) {
-                    let { data: profileData } = await supabaseClient.from('profiles').select('avatar_url').eq('username', story.username).maybeSingle();
-                    let avatarHtml = profileData && profileData.avatar_url ? `<img src="${profileData.avatar_url}" alt="story">` : `👤`;
-                    container.innerHTML += `<div class="story-item" onclick='openStoryModal(${JSON.stringify(story)}, ${JSON.stringify(profileData ? profileData.avatar_url : "")})'><div class="story-circle">${avatarHtml}</div><span>${story.username}</span></div>`;
-                }
-            }
-        }
-
-        async function openStoryModal(story, avatarUrl) {
-            currentActiveStoryId = story.id;
-            currentActiveStoryOwner = story.username;
-            document.getElementById('modalImage').src = story.media_url;
-            document.getElementById('modalUsernameHeader').innerText = story.username;
-            
-            let modalAvatar = document.getElementById('modalUserAvatar');
-            if (avatarUrl) { modalAvatar.src = avatarUrl; modalAvatar.style.display = 'block'; }
-            else { modalAvatar.style.display = 'none'; }
-
-            document.getElementById('viewsCount').innerText = story.views || 0;
-            
-            let reactions = story.reactions || {};
-            document.getElementById('count-🙏').innerText = reactions['🙏'] || 0;
-            document.getElementById('count-💔').innerText = reactions['💔'] || 0;
-            document.getElementById('count-🫶').innerText = reactions['🫶'] || 0;
-
-            document.getElementById('storyModal').style.display = 'flex';
-
-            let currentUsername = document.getElementById('profile-username').innerText;
-            let ownerActions = document.getElementById('storyOwnerActions');
-            if (story.username === currentUsername) {
-                ownerActions.style.display = 'flex';
-            } else {
-                ownerActions.style.display = 'none';
-            }
-
-            if (story.username !== currentUsername) {
-                let newViews = (story.views || 0) + 1;
-                document.getElementById('viewsCount').innerText = newViews;
-                await supabaseClient.from('stories').update({ views: newViews }).eq('id', story.id);
-            }
-        }
-
-        async function reactStory(emoji) {
-            if (!currentActiveStoryId) return;
-            let currentUsername = document.getElementById('profile-username').innerText;
-
-            const { data } = await supabaseClient.from('stories').select('reactions').eq('id', currentActiveStoryId).maybeSingle();
-            let reactions = (data && data.reactions) ? data.reactions : {};
-            
-            reactions[emoji] = (reactions[emoji] || 0) + 1;
-            document.getElementById(`count-${emoji}`).innerText = reactions[emoji];
-
-            await supabaseClient.from('stories').update({ reactions: reactions }).eq('id', currentActiveStoryId);
-            showMessage(`تم إرسال التفاعل ${emoji} ❤️`);
-
-            if (currentActiveStoryOwner && currentActiveStoryOwner !== currentUsername) {
-                await supabaseClient.from('notifications').insert([{
-                    recipient_username: currentActiveStoryOwner,
-                    sender_username: currentUsername,
-                    message: `قام ${currentUsername} بالتفاعل ${emoji} مع قصتك.`
-                }]);
-            }
-        }
-
-        function closeStoryModal() {
-            document.getElementById('storyModal').style.display = 'none';
-            currentActiveStoryId = null;
-            currentActiveStoryOwner = null;
-        }
-
-        function triggerEditStory() { document.getElementById('story-edit-input').click(); }
-        
-        async function updateStoryImage(input) {
-            if (!input.files[0] || !currentActiveStoryId) return;
-            compressImage(input.files[0], 1200, 1200, 0.9, async function(newImage) {
-                const { error } = await supabaseClient.from('stories').update({ media_url: newImage }).eq('id', currentActiveStoryId);
-                if (!error) {
-                    showMessage("تم تعديل الستوري بجودة عالية ✏️");
-                    document.getElementById('modalImage').src = newImage;
-                    loadStories();
-                } else {
-                    showMessage("خطأ أثناء التعديل");
-                }
-            });
-        }
-
-        function confirmDeleteStory() {
-            if (confirm("هل أنت متأكد من حذف الستوري؟")) { executeDeleteStory(); }
-        }
-
-        async function executeDeleteStory() {
-            if (!currentActiveStoryId) return;
-            const { error } = await supabaseClient.from('stories').delete().eq('id', currentActiveStoryId);
-            if (!error) {
-                showMessage("تم الحذف بنجاح 🗑");
-                closeStoryModal();
-                loadStories();
-            } else {
-                showMessage("خطأ أثناء الحذف");
-            }
-        }
-
-        async function loadUserNotifications(username) {
-            const { data } = await supabaseClient.from('notifications').select('*').eq('recipient_username', username).order('created_at', { ascending: false });
-            const listEl = document.getElementById('notificationsList');
-            listEl.innerHTML = '';
-            
-            if (data && data.length > 0) {
-                data.forEach(notif => {
-                    appendNotificationToUI(notif);
-                });
-            } else {
-                listEl.innerHTML = `<p style="text-align:center; color: #888; font-size:13px;">لا توجد إشعارات حالياً.</p>`;
-            }
-        }
-
-        function appendNotificationToUI(notif) {
-            const listEl = document.getElementById('notificationsList');
-            if (listEl.innerHTML.includes('لا توجد إشعارات')) { listEl.innerHTML = ''; }
-            
-            let dateStr = new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            listEl.innerHTML += `
-                <div class="notif-card">
-                    ${notif.message}
-                    <span>${dateStr}</span>
+    <!-- 2. نافذة عرض وتفاعل الستوري (مع المشاهدات، التفاعلات، الحذف والتعديل) -->
+    <div id="story-modal" class="modal" style="display: none;">
+        <div class="modal-content story-modal-content">
+            <span class="close-modal" id="close-story-modal">✕</span>
+            <div id="story-viewer-body">
+                <!-- عرض الوسائط -->
+                <div id="story-media-container"></div>
+                <!-- معلومات المشاهدات وصاحب الستوري -->
+                <div class="story-meta-info">
+                    <span id="story-views-count">👁️ 0 مشاهدات</span>
+                    <div id="story-owner-actions" style="display: none;">
+                        <button id="edit-story-btn">تعديل</button>
+                        <button id="delete-story-btn">حذف</button>
+                    </div>
                 </div>
-            `;
-        }
+                <!-- أزرار التفاعلات -->
+                <div class="story-reactions-bar">
+                    <button class="reaction-btn" data-reaction="love">❤️</button>
+                    <button class="reaction-btn" data-reaction="like">👍</button>
+                    <button class="reaction-btn" data-reaction="wow">😮</button>
+                    <button class="reaction-btn" data-reaction="sad">😢</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function openBroadcastModal() {
-            document.getElementById('broadcastModal').style.display = 'flex';
-        }
+    <!-- 3. نافذة رفع وتعديل الملفات (PDF, Word, PowerPoint) للأدمن -->
+    <div id="file-upload-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" id="close-file-modal">✕</span>
+            <h3>رفع ملف تعليمي جديد</h3>
+            <input type="text" id="file-name-input" placeholder="اسم الملف">
+            <textarea id="file-desc-input" placeholder="وصف الملف"></textarea>
+            <select id="file-type-select">
+                <option value="pdf">PDF</option>
+                <option value="word">Word</option>
+                <option value="ppt">PowerPoint</option>
+                <option value="image">صورة</option>
+                <option value="video">فيديو</option>
+                <option value="zip">ZIP</option>
+                <option value="link">رابط خارجي</option>
+            </select>
+            <input type="file" id="actual-file-input">
+            <button id="save-file-upload-btn">رفع وحفظ</button>
+        </div>
+    </div>
 
-        async function sendBroadcastNotification() {
-            let msg = document.getElementById('broadcastMsgInput').value.trim();
-            if (!msg) { showMessage("يرجى كتابة نص الإشعار أولاً"); return; }
+    <!-- 4. نافذة الإشعارات -->
+    <div id="notifications-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" id="close-notif-modal">✕</span>
+            <h3>الإشعارات</h3>
+            <div id="notifications-list"></div>
+        </div>
+    </div>
 
-            const { data: profiles } = await supabaseClient.from('profiles').select('username');
-            if (profiles) {
-                let notificationsBatch = profiles.map(p => ({
-                    recipient_username: p.username,
-                    sender_username: 'الإدارة',
-                    message: `📢 إشعار إداري: ${msg}`
-                }));
+    <!-- 5. نافذة دعوة صديق ورمز الإحالة -->
+    <div id="referral-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" id="close-referral-modal">✕</span>
+            <h3>دعوة الأصدقاء ورمز الإحالة</h3>
+            <p>شارك رمز الإحالة الخاص بك مع أصدقائك:</p>
+            <div id="user-referral-code" class="code-box">---</div>
+            <button id="copy-referral-btn">نسخ الرمز</button>
+        </div>
+    </div>
 
-                await supabaseClient.from('notifications').insert(notificationsBatch);
-                document.getElementById('broadcastModal').style.display = 'none';
-                document.getElementById('broadcastMsgInput').value = '';
-                showMessage("تم إرسال الإشعار للجميع بنجاح ✅");
-            }
-        }
-
-        function showMessage(text) {
-            let msg = document.createElement("div");
-            msg.innerHTML = text;
-            msg.style.position = "fixed"; msg.style.bottom = "90px"; msg.style.left = "50%"; msg.style.transform = "translateX(-50%)";
-            msg.style.background = "#007bff"; msg.style.color = "white"; msg.style.padding = "12px 20px"; msg.style.borderRadius = "20px"; msg.style.zIndex = "9999"; msg.style.fontSize = "15px";
-            document.body.appendChild(msg);
-            setTimeout(() => { msg.remove(); }, 2500);
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
